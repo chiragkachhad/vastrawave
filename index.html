@@ -1740,9 +1740,9 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
   function computeSizes(){
     posterH = (W <= 600 ? 104 : 128) + (W <= 600 ? 34 : 38);   /* poster + announcement bar */
     floorY  = H - posterH;
-    N = W >= 1100 ? 5 : W >= 760 ? 4 : W >= 520 ? 3 : 2;
+    N = W >= 760 ? 5 : W >= 520 ? 3 : 2;   /* main screen par ek time par itne hi BADE kapde — baaki train me aayenge */
     var avail = W - 48;
-    CW = Math.max(110, Math.min(260, (avail / N) * 0.88));   /* 0.88 = beech me gap, kapde takrayenge nahi */
+    CW = Math.max(120, Math.min(430, (avail / N) * 1.24));
     CH = Math.round(CW * 1.34);
     hanger = Math.max(26, Math.min(46, Math.round(CW * 0.17)));
     /* height guard — kapda poster ke andar na ghuse */
@@ -1854,16 +1854,16 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
     else { engine.positionIterations = 8; engine.velocityIterations = 6; engine.constraintIterations = 4; }
     computeSizes(); makeBokeh();
 
-    /* RACK LAYOUT — SAB kapde EK SAATH screen par, SIDE-ANGLE pose me.
-       Front-facing poori line screen se lambi banti hai, isliye har kapde ki
-       chaudaai ko rackCos se daba kar (side-angle look) saare ek frame me
-       chipka diye. Bahut chhoti screen par rackScale poore rack ko chhota kar deta hai. */
+    /* TRAIN LAYOUT — BADE kapde, screen par ek time par sirf ~N (desktop 5) dikhte hain.
+       Poori line (cycle) screen se kai guna lambi hai; gaadi chalti rehti hai aur
+       baaki kapde baari-baari aate hain. rackCos halka side-angle dabav deta hai. */
     var list = pickProducts();
     var rws = list.map(function(p){ return renderWidth(p); });
     var fsteps = [];
     for (var si = 0; si < list.length; si++) fsteps.push(stepBetween(list[si], list[(si + 1) % list.length]));   /* cyclic — aakhri dabbe ke baad pehla, GAADI ki tarah */
     var frontCycle = fsteps.reduce(function(s,x){ return s + x; }, 0);
-    rackCos = Math.max(0.30, Math.min(0.62, (W * 1.06) / Math.max(1, frontCycle)));
+    var VIS = Math.max(1, N || 5);
+    rackCos = Math.max(0.55, Math.min(0.98, ((list.length / VIS) * W) / Math.max(1, frontCycle)));   /* cycle itni lambi ki screen par ~VIS hi aayein */
     rackScale = 1;
     var angSteps = fsteps.map(function(s){ return s * rackCos; });
     var span = angSteps.reduce(function(s,x){ return s + x; }, 0);
@@ -2669,5 +2669,5 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
   else start();
 })();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4f8f3955a7ee83d',t:'MTc5Mjg0NDU5Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4f91cd07d1284cb',t:'MTc5Mjg0NjI4Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
