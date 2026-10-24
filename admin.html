@@ -1247,11 +1247,13 @@ var CONFIG = {
 
   freeShippingAbove: 999,
   shippingCharge: 60,
-  codAvailable: true,
+  codAvailable: false,   // FILHAL BAND — abhi sirf UPI payment chalega
+  upiId: &quot;kachhad.2000@ptaxis&quot;,
+  upiPayName: &quot;VastraWave&quot;,
   packagingWeight: 50,
 
   coupon: { code: &quot;VASTRAA10&quot;, percent: 10, minCart: 999 },
-  prepaidPercent: 5,              // prepaid (UPI/card) par extra 5% off — COD kam karne ke liye
+  prepaidPercent: 5,              // prepaid (UPI/card) par extra 5% off
 
   dispatchBeforeHour: 15,         // 3 pm se pehle ke orders aaj dispatch
   deliveryMinDays: 3,
@@ -1263,7 +1265,7 @@ var CONFIG = {
   announces: [
     &quot;FREE shipping above ₹999 · <b>VASTRAA10</b> — 10% off&quot;,
     &quot;Extra <b>5% OFF</b> on prepaid orders (UPI / Card)&quot;,
-    &quot;COD available · 7-day easy exchange&quot;
+    &quot;UPI payment · 7-day easy exchange&quot;
   ]
 };
 
@@ -2073,11 +2075,13 @@ var CONFIG = {
 
   freeShippingAbove: 999,
   shippingCharge: 60,
-  codAvailable: true,
+  codAvailable: false,   // FILHAL BAND — abhi sirf UPI payment chalega
+  upiId: "kachhad.2000@ptaxis",
+  upiPayName: "VastraWave",
   packagingWeight: 50,
 
   coupon: { code: "VASTRAA10", percent: 10, minCart: 999 },
-  prepaidPercent: 5,              // prepaid (UPI/card) par extra 5% off — COD kam karne ke liye
+  prepaidPercent: 5,              // prepaid (UPI/card) par extra 5% off
 
   dispatchBeforeHour: 15,         // 3 pm se pehle ke orders aaj dispatch
   deliveryMinDays: 3,
@@ -2089,7 +2093,7 @@ var CONFIG = {
   announces: [
     "FREE shipping above ₹999 · <b>VASTRAA10</b> — 10% off",
     "Extra <b>5% OFF</b> on prepaid orders (UPI / Card)",
-    "COD available · 7-day easy exchange"
+    "UPI payment · 7-day easy exchange"
   ]
 };
 
@@ -2450,6 +2454,7 @@ function addToCart(id, size, colour, qty){
   else c.push({ key:k, id, size, colour, qty, price:p.price, name:p.name, img:"" });
   saveCart(c);
   toast("Cart me add ho gaya — " + p.name);
+  try{ if (window.FW) FW.celebrate(); }catch(e){}   /* 🎆 Diwali fatake */
 }
 function setQty(k, q){
   const c = getCart(); const i = c.find(x=>x.key===k); if(!i) return;
@@ -2616,7 +2621,7 @@ function getRecent(except){
   return store.get("vs_recent", []).filter(x => x !== except).map(productById).filter(Boolean).slice(0, 4);
 }
 
-/* ---------- Prepaid discount (COD kam karne ke liye) ---------- */
+/* ---------- Prepaid discount ---------- */
 function prepaidOff(subtotal){ return Math.round(subtotal * (CONFIG.prepaidPercent || 0) / 100); }
 
 /* ---------- Search ---------- */
