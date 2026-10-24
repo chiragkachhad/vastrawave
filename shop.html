@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shop All — Sarees, Kurtis, Lehengas, Suits | VastraWave</title>
+<meta name="description" content="Browse the full VastraWave ethnic wear collection. Filter by size, colour, price and category.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%237A1F2B'/><text x='50' y='70' font-size='60' font-family='serif' fill='%23C9A227' text-anchor='middle'>V</text></svg>">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/style-vivid.css">
+</head>
+<body>
+
+<header id="site-header" class="top"></header>
+
+<main class="wrap">
+  <div class="crumb"><a href="clothesline.html">Home</a> / Shop</div>
+  <h1 style="font-size:22px; margin:6px 0 12px" id="title">All products</h1>
+
+  <!-- Mobile filter chips -->
+  <div class="chips" id="catchips"></div>
+
+  <div class="layout">
+    <!-- Sidebar filters (desktop) -->
+    <aside class="side">
+      <div class="filters" id="filters"></div>
+    </aside>
+
+    <div>
+      <div class="shopbar">
+        <span class="lbl" id="count">0 products</span>
+        <span class="row" style="gap:6px">
+          <span class="lbl">Sort</span>
+          <select id="sort" onchange="apply()">
+            <option value="pop">Popularity</option>
+            <option value="new">Newest first</option>
+            <option value="low">Price: low to high</option>
+            <option value="high">Price: high to low</option>
+            <option value="rating">Top rated</option>
+            <option value="discount">Biggest discount</option>
+          </select>
+        </span>
+      </div>
+      <div class="grid" id="grid"></div>
+    </div>
+  </div>
+</main>
+
+<footer id="site-footer"></footer>
+<nav id="bottomnav" class="bottomnav"></nav>
+<div id="fab"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/products-live-data.js"></script>
+<script src="assets/js/products-live.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+/* ---------- Filter state ---------- */
+const ALL_SIZES = [...new Set(PRODUCTS.flatMap(p => p.sizes))];
+const ALL_COLOURS = [...new Set(PRODUCTS.flatMap(p=>p.colours.map(c=>c.n)))];
+
+let F = {
+  gender: qs.get("gender") || "",
+  cat: qs.get("cat") || "",
+  q: qs.get("q") || "",
+  sizes: [],
+  colours: [],
+  max: 10000,
+  sort: "pop"
+};
+
+function renderFilterUI(){
+  const box = document.getElementById("filters");
+  box.innerHTML = `
+    <div class="fgroup">
+      <h4>Shop for</h4>
+      <label class="opt"><input type="radio" name="gen" value="" ${F.gender===""?"checked":""} onchange="setGender('')"> All</label>
+      ${GENDERS.map(g=>`<label class="opt"><input type="radio" name="gen" value="${g}" ${F.gender===g?"checked":""} onchange="setGender('${g}')"> ${g}</label>`).join("")}
+    </div>
+    <div class="fgroup">
+      <h4>Category</h4>
+      <label class="opt"><input type="radio" name="cat" value="" ${F.cat===""?"checked":""} onchange="setCat('')"> All products</label>
+      ${CATEGORIES.map(c=>`<label class="opt"><input type="radio" name="cat" value="${c}" ${F.cat===c?"checked":""} onchange="setCat('${c}')"> ${c}</label>`).join("")}
+    </div>
+    <div class="fgroup">
+      <h4>Size</h4>
+      ${ALL_SIZES.map(s=>`<label class="opt"><input type="checkbox" value="${s}" ${F.sizes.includes(s)?"checked":""} onchange="toggleArr('sizes','${s}')"> ${s}</label>`).join("")}
+    </div>
+    <div class="fgroup">
+      <h4>Colour</h4>
+      ${ALL_COLOURS.map(c=>{
+        const h = PRODUCTS.flatMap(p=>p.colours).find(x=>x.n===c).h;
+        return `<label class="opt"><input type="checkbox" value="${c}" ${F.colours.includes(c)?"checked":""} onchange="toggleArr('colours','${c}')"> <span class="swatch" style="background:${h}"></span> ${c}</label>`;
+      }).join("")}
+    </div>
+    <div class="fgroup">
+      <h4>Max price — <span id="pmax">${money(F.max)}</span></h4>
+      <input class="range" type="range" min="499" max="10000" step="100" value="${F.max}" oninput="setMax(this.value)">
+    </div>
+    <button class="btn ghost" onclick="resetF()">Clear all filters</button>`;
+
+  document.getElementById("catchips").innerHTML =
+    GENDERS.map(g=>`<button class="chip ${F.gender===g?"on":""}" onclick="setGender('${g}')">${g}</button>`).join("") +
+    (F.gender ? `<button class="chip on" onclick="setGender('')">✕ ${F.gender}</button>` : "") +
+    `<button class="chip ${F.cat===""?"on":""}" onclick="setCat('')">All</button>` +
+    CATEGORIES.map(c=>`<button class="chip ${F.cat===c?"on":""}" onclick="setCat('${c}')">${c}</button>`).join("") +
+    `<button class="chip" onclick="document.getElementById('filters').scrollIntoView({behavior:'smooth'})">⚙️ Filters</button>`;
+}
+
+function setCat(c){ F.cat = c; F.sizes=[]; F.colours=[]; F.max=10000; renderFilterUI(); apply(); }
+function setGender(g){ F.gender = g; F.cat=""; F.sizes=[]; F.colours=[]; F.max=10000; renderFilterUI(); apply(); }
+function toggleArr(k, v){ const i = F[k].indexOf(v); i>-1 ? F[k].splice(i,1) : F[k].push(v); apply(); }
+function setMax(v){ F.max = +v; document.getElementById("pmax").textContent = money(F.max); apply(); }
+function resetF(){ F = {gender:"", cat:"", q:"", sizes:[], colours:[], max:10000, sort:F.sort}; renderFilterUI(); apply(); }
+
+function filtered(){
+  let l = PRODUCTS.slice();
+  // Unisex products dono (Men + Women) me dikhte hain
+  if(F.gender) l = l.filter(p => p.gender === F.gender || (F.gender !== "Unisex" && p.gender === "Unisex"));
+  if(F.cat) l = l.filter(p=>p.category===F.cat);
+  if(F.q){
+    const q = F.q.toLowerCase();
+    l = l.filter(p=>(p.name+" "+p.category+" "+p.fabric+" "+p.desc).toLowerCase().includes(q));
+  }
+  if(F.sizes.length) l = l.filter(p=>p.sizes.some(s=>F.sizes.includes(s)));
+  if(F.colours.length) l = l.filter(p=>p.colours.some(c=>F.colours.includes(c.n)));
+  l = l.filter(p=>p.price <= F.max);
+  const s = document.getElementById("sort").value;
+  if(s==="low") l.sort((a,b)=>a.price-b.price);
+  else if(s==="high") l.sort((a,b)=>b.price-a.price);
+  else if(s==="rating") l.sort((a,b)=>b.rating-a.rating);
+  else if(s==="discount") l.sort((a,b)=>offPct(b)-offPct(a));
+  else if(s==="new") l.reverse();
+  return l;
+}
+
+function apply(){
+  const l = filtered();
+  document.getElementById("count").textContent = l.length + (l.length===1?" product":" products");
+  document.getElementById("title").textContent =
+    (F.gender ? F.gender + (F.cat ? " — " + F.cat : "") : (F.cat || (F.q ? 'Results for "'+F.q+'"' : "All products")));
+  document.title = (F.gender || F.cat || "Shop") + " — VastraWave";
+  paintGrid(document.getElementById("grid"), l);
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+  injectChrome("shop.html");
+  const q = qs.get("q"); if(q) F.q = q;
+  if(qs.get("sort")) document.getElementById("sort").value = qs.get("sort");
+  renderFilterUI();
+  apply();
+});
+</script>
+</body>
+</html>

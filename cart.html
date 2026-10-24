@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your Cart — VastraWave</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%237A1F2B'/><text x='50' y='70' font-size='60' font-family='serif' fill='%23C9A227' text-anchor='middle'>V</text></svg>">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/style-vivid.css">
+</head>
+<body>
+
+<header id="site-header" class="top"></header>
+
+<main class="wrap">
+  <div class="crumb"><a href="clothesline.html">Home</a> / Cart</div>
+  <h1 style="font-size:22px; margin:6px 0 14px">Shopping bag <span class="muted tiny" id="qty"></span></h1>
+
+  <div class="checkout-grid">
+    <div id="items"></div>
+
+    <div class="summary" id="summary"></div>
+  </div>
+</main>
+
+<footer id="site-footer"></footer>
+<nav id="bottomnav" class="bottomnav"></nav>
+<div id="fab"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/products-live-data.js"></script>
+<script src="assets/js/products-live.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+function applyCoupon(){
+  const v = (document.getElementById("coupon").value||"").trim().toUpperCase();
+  const t = totals();
+  if(v === CONFIG.coupon.code){
+    if(t.subtotal < CONFIG.coupon.minCart){
+      toast("Coupon ke liye minimum " + money(CONFIG.coupon.minCart) + " ka order chahiye");
+      return;
+    }
+    setCoupon(v); toast("Coupon applied — " + CONFIG.coupon.percent + "% off 🎉");
+  } else if(v === "") { setCoupon(""); }
+  else { toast("Invalid coupon code"); }
+  renderCart();
+}
+
+function renderCart(){
+  const t = totals();
+  const box = document.getElementById("items");
+  const sum = document.getElementById("summary");
+
+  document.getElementById("qty").textContent = t.items.length ? "(" + t.items.length + " items)" : "";
+
+  if(!t.items.length){
+    box.innerHTML = `<div class="empty"><div class="e-ico">🛒</div>
+      <h2>Your bag is empty</h2>
+      <p class="muted">Kuch accha add karein — festive collection abhi live hai.</p>
+      <a href="shop.html" class="btn" style="width:auto;display:inline-flex;margin-top:14px">Continue shopping</a></div>`;
+    sum.innerHTML = "";
+    return;
+  }
+
+  box.innerHTML = t.items.map(i=>`
+    <div class="cart-item">
+      <a href="product.html?id=${i.id}"><img src="${i.img}" alt=""></a>
+      <div class="ci-body">
+        <div class="spread">
+          <a href="product.html?id=${i.id}" class="n">${esc(i.name)}</a>
+          <button class="x" onclick="removeItem('${i.key}')" title="Remove">×</button>
+        </div>
+        <div class="v">Size: <b>${esc(i.size)}</b> · Colour: <b>${esc(i.colour)}</b> · SKU ${i.id}</div>
+        <div class="price" style="margin-top:4px"><span class="now">${money(i.price * i.qty)}</span></div>
+        <div class="spread">
+          <div class="qty">
+            <button onclick="setQty('${i.key}', ${i.qty - 1})">−</button>
+            <span>${i.qty}</span>
+            <button onclick="setQty('${i.key}', ${i.qty + 1})">+</button>
+          </div>
+          <button class="btn sm ghost" onclick="removeItem('${i.key}')" style="border:none;color:var(--muted);text-decoration:underline">Remove</button>
+        </div>
+      </div>
+    </div>`).join("");
+
+  const gap = CONFIG.freeShippingAbove - (t.subtotal - t.discount);
+  const pctDone = Math.min(100, Math.round((t.subtotal - t.discount) / CONFIG.freeShippingAbove * 100));
+
+  sum.innerHTML = `
+    <h3 style="font-size:15px;margin-bottom:8px">Order summary</h3>
+    <div class="coupon">
+      <input id="coupon" placeholder="Coupon code" value="${esc(getCoupon())}">
+      <button class="btn sm ghost" onclick="applyCoupon()">Apply</button>
+    </div>
+    ${t.discount ? `<div class="tiny" style="color:var(--ok);font-weight:700;margin-bottom:8px">✔ ${CONFIG.coupon.code} applied — ${CONFIG.coupon.percent}% off</div>`
+                 : `<div class="tiny muted" style="margin-bottom:8px">Try code <b>${CONFIG.coupon.code}</b> for ${CONFIG.coupon.percent}% off on ${money(CONFIG.coupon.minCart)}+</div>`}
+    ${gap > 0 ? `<div class="tiny" style="margin:10px 0 2px">Add ${money(gap)} more for <b>FREE shipping</b></div>
+      <div class="shipbar"><i style="width:${pctDone}%"></i></div>` : `<div class="tiny" style="color:var(--ok);font-weight:700;margin:10px 0">🎉 Free shipping unlocked</div>`}
+
+    ${t.discount ? "" : `<div class="prepaid" style="margin:8px 0">⚡ Prepaid (UPI/Card) par extra ${CONFIG.prepaidPercent}% off — ${money(prepaidOff(t.subtotal))} bachega</div>`}
+    <div class="l"><span>Subtotal</span><span>${money(t.subtotal)}</span></div>
+    ${t.discount ? `<div class="l"><span>Discount</span><span style="color:var(--ok)">− ${money(t.discount)}</span></div>` : ""}
+    <div class="l"><span>Shipping</span><span>${t.shipping ? money(t.shipping) : "FREE"}</span></div>
+    <div class="l"><span>Tax (GST)</span><span class="muted">Included</span></div>
+    <div class="l total"><span>Total</span><span>${money(t.total)}</span></div>
+    <a href="checkout.html" class="btn" style="margin-top:12px">Proceed to checkout →</a>
+    <a href="shop.html" class="btn ghost" style="margin-top:8px">Continue shopping</a>
+    <div class="tiny muted" style="margin-top:12px">🔒 Secure checkout · COD available · 7-day easy exchange</div>
+  `;
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+  injectChrome("cart.html");
+  renderCart();
+});
+</script>
+</body>
+</html>

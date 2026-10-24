@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Store Admin — VastraWave</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%237A1F2B'/><text x='50' y='70' font-size='60' font-family='serif' fill='%23C9A227' text-anchor='middle'>V</text></svg>">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/style-vivid.css">
+  <script src="assets/js/admin-lock.js"></script>
+
+  <style>
+    .adminscroll{overflow:auto;-webkit-overflow-scrolling:touch;max-height:58vh;min-height:220px;
+                 border:1px solid #E3E6EA;border-radius:8px;background:#fff}
+    .adminscroll table{margin:0}
+    .adminscroll th{position:sticky;top:0;z-index:2;box-shadow:0 1px 0 #D5D9DF}
+    @media(max-width:720px){.adminscroll{max-height:55vh}}
+  </style>
+</head>
+<body class="lockable">
+<!-- ===== ADMIN LOCK — password ke bina kuch nahi dikhega ===== -->
+<div id="gate" class="adminlock">
+  <div class="gatebox">
+    <div class="ico">🔒</div>
+    <h2>Store Admin</h2>
+    <p>Sirf authorized log ke liye.<br>Password daal kar andar aayein.</p>
+    <input type="password" id="pw" placeholder="Password" autocomplete="current-password">
+    <button type="button" onclick="adminTryUnlock()">Unlock</button>
+    <div class="hint2" id="gatehint"></div>
+  </div>
+</div>
+<script>
+(function(){
+  if (window.adminLockBoot) adminLockBoot();
+  var p = document.getElementById("pw");
+  if (p) p.addEventListener("keydown", function(e){ if (e.key === "Enter") adminTryUnlock(); });
+})();
+</script>
+
+
+<header id="site-header" class="top"></header>
+
+<main class="wrap">
+  <div class="crumb"><a href="clothesline.html">Home</a> / Admin</div>
+  <h1 style="font-size:22px; margin:6px 0 4px">Store admin</h1>
+  <p class="muted tiny" style="margin:0 0 16px">Yahan se order status change karein, courier/AWB fill karein aur <b>delivery partner ko dene ke liye shipping label print</b> karein.</p>
+
+  <div class="admin-wrap" id="kpis"></div>
+
+  <section>
+    <div class="sec-head">
+      <h2>Orders &amp; shipping</h2>
+      <div class="row" style="gap:8px">
+        <a href="label.html" class="btn sm" target="_blank">🖨️ Print all labels</a>
+        <a href="tools/product-manager.html" class="btn sm" style="background:#0F7A45;border-color:#0F7A45;color:#fff">📦 Product manager</a>
+        <a href="tools/add-product.html" class="btn sm ghost" target="_blank">🧾 Quick listing tool</a>
+        <button class="btn sm ghost" onclick="if(window.adminLockNow){adminLockNow()}">🔒 Lock</button>
+        <button class="btn sm ghost" onclick="seedDemo()">Add sample order</button>
+      </div>
+    </div>
+    <div class="adminscroll"><table class="orders" id="orders"></table></div>
+    <div class="tiny muted" style="margin-top:8px">
+      Courier + AWB fill kar ke <b>Print</b> dabayein — ek print-ready label khulega jisme customer ka address,
+      COD amount, weight, pieces aur barcode hoga. Ye label parcel par chipka kar courier ko de dein.
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>Inventory</h2>
+      <a href="tools/product-manager.html" class="btn sm">✏️ Add / Edit / Delete products</a>
+    </div>
+    <div class="adminscroll"><table class="orders" id="inventory"></table></div>
+    <div class="tiny muted" style="margin-top:8px">
+      Products ko add, edit ya delete karne ke liye
+      <a href="tools/product-manager.html" style="color:var(--brand)"><b>Product manager</b></a> kholein —
+      wahan se stock bhi badal sakte hain aur photo upload kar sakte hain.
+    </div>
+  </section>
+</main>
+
+<footer id="site-footer"></footer>
+<nav id="bottomnav" class="bottomnav"></nav>
+<div id="fab"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/products-live-data.js"></script>
+<script src="assets/js/products-live.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+const STATUSES = ["Placed","Packed","Shipped","Out for delivery","Delivered","RTO / Returned"];
+
+function seedDemo(){
+  const items = ["TS301 Oversized Boxy T-Shirt — White (L/White) ×2", "BT401 High-Waist Straight Jeans — Blue (32/Blue) ×1"];
+  const o = {
+    id: "VS" + Math.floor(1000000 + Math.random()*8999999),
+    date: new Date().toLocaleString("en-IN"),
+    name: "Demo Customer", phone: "9876543210",
+    address: "B/12, Gandhi Chowk, Bardoli, Surat, Gujarat - 394601",
+    pay: "COD",
+    items: items,
+    subtotal: 2097, discount: 0, shipping: 0, total: 2097,
+    weight: 2*220 + 550 + CONFIG.packagingWeight, pieces: 3,
+    courier: CONFIG.couriers[0], awb: "", status: "Placed"
+  };
+  saveOrder(o); renderAdmin(); toast("Sample order add ho gaya");
+}
+
+function setStatus(id, v){
+  const l = getOrders(); const o = l.find(x=>x.id===id);
+  if(o){ o.status = v; store.set("vs_orders", l); toast("Status → " + v); renderAdmin(); }
+}
+function setField(id, k, v){
+  const l = getOrders(); const o = l.find(x=>x.id===id);
+  if(o){ o[k] = v; store.set("vs_orders", l); }
+}
+
+function renderAdmin(){
+  const orders = getOrders();
+  const live = orders.filter(o=>o.status!=="RTO / Returned");
+  const totalRev = live.reduce((s,o)=>s+o.total,0);
+  const cod = orders.filter(o=>o.pay==="COD").length;
+  const aov = orders.length ? Math.round(totalRev / orders.length) : 0;
+
+  document.getElementById("kpis").innerHTML = `
+    <div class="kpi"><div class="k">Orders</div><div class="v">${orders.length}</div></div>
+    <div class="kpi"><div class="k">Revenue</div><div class="v">${money(totalRev)}</div></div>
+    <div class="kpi"><div class="k">COD share</div><div class="v">${orders.length ? Math.round(cod/orders.length*100) : 0}%</div></div>
+    <div class="kpi"><div class="k">Avg order value</div><div class="v">${money(aov)}</div></div>`;
+
+  document.getElementById("orders").innerHTML = orders.length ? `
+    <tr>
+      <th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Pay</th>
+      <th>Courier / AWB</th><th>Wt (g)</th><th>Label</th><th>Status</th>
+    </tr>
+    ${orders.map(o=>`
+    <tr>
+      <td><b>${o.id}</b><br><span class="tiny muted">${esc(o.date)}</span></td>
+      <td>${esc(o.name)}<br><span class="tiny muted">${esc(o.phone)}</span><br><span class="tiny muted">${esc(o.address)}</span></td>
+      <td class="tiny">${o.items.map(i=>esc(i)).join("<br>")}</td>
+      <td><b>${money(o.total)}</b></td>
+      <td><span class="pill ${o.pay==="COD"?"cod":"paid"}">${o.pay}</span></td>
+      <td>
+        <select class="sel" style="width:110px" onchange="setField('${o.id}','courier',this.value)">
+          ${CONFIG.couriers.map(c=>`<option ${c===(o.courier||CONFIG.couriers[0])?"selected":""}>${c}</option>`).join("")}
+        </select><br>
+        <input class="sel" style="width:110px;height:28px;margin-top:4px" placeholder="AWB no."
+               value="${esc(o.awb||"")}" onchange="setField('${o.id}','awb',this.value.trim())">
+      </td>
+      <td><input class="sel" style="width:60px;height:28px" value="${o.weight || ""}"
+                 onchange="setField('${o.id}','weight',parseInt(this.value,10)||0)"></td>
+      <td><a href="label.html?order=${o.id}" target="_blank" class="btn sm" style="white-space:nowrap">🖨️ Print</a></td>
+      <td><select class="sel" onchange="setStatus('${o.id}', this.value)">
+        ${STATUSES.map(s=>`<option ${s===o.status?"selected":""}>${s}</option>`).join("")}
+      </select></td>
+    </tr>`).join("")}`
+    : `<tr><td class="muted center" style="padding:26px">Abhi koi order nahi —
+        <a href="shop.html" style="color:var(--brand)">ek demo order place karein</a>
+        ya upar "Add sample order" dabayein, phir uska shipping label print kar ke dekhein.</td></tr>`;
+
+  document.getElementById("inventory").innerHTML = `
+    <tr><th>SKU</th><th>Product</th><th>Category</th><th>Price</th><th>Stock (total)</th><th>Wt/pc</th><th>Status</th></tr>
+    ${PRODUCTS.map(p=>{
+      const tot = Object.values(p.stock).reduce((a,b)=>a+b,0);
+      const outSizes = Object.keys(p.stock).filter(s=>p.stock[s]===0);
+      return `<tr>
+        <td class="tiny">${p.id}</td>
+        <td>${esc(p.name)}</td>
+        <td>${p.category}</td>
+        <td>${money(p.price)}</td>
+        <td><b style="color:${tot<5?"#B3261E":"inherit"}">${tot}</b></td>
+        <td class="tiny">${p.wt || 250} g</td>
+        <td class="tiny">${outSizes.length ? "Out of stock: " + outSizes.join(", ") : "In stock"}</td>
+      </tr>`;
+    }).join("")}`;
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+  injectChrome("admin.html");
+  renderAdmin();
+});
+</script>
+</body>
+</html>

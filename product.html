@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Product — VastraWave</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%237A1F2B'/><text x='50' y='70' font-size='60' font-family='serif' fill='%23C9A227' text-anchor='middle'>V</text></svg>">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/style-vivid.css">
+</head>
+<body>
+
+<header id="site-header" class="top"></header>
+
+<main class="wrap">
+  <div class="crumb" id="crumb"></div>
+  <div class="pdp">
+    <!-- Gallery -->
+    <div>
+      <div class="gal">
+        <div class="main"><img id="mainimg" src="" alt="" onclick="zoom(this.src)"></div>
+        <div class="thumbs" id="thumbs"></div>
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div id="info"></div>
+  </div>
+
+  <!-- Reviews -->
+  <section>
+    <div class="sec-head"><h2>Ratings &amp; reviews</h2></div>
+    <div class="acc" id="reviews"></div>
+  </section>
+
+  <!-- Related -->
+  <section>
+    <div class="sec-head"><h2>You may also like</h2></div>
+    <div class="grid" id="related"></div>
+  </section>
+
+  <!-- Recently viewed -->
+  <section id="recentsec">
+    <div class="sec-head"><h2>Recently viewed</h2></div>
+    <div class="grid" id="recentgrid"></div>
+  </section>
+</main>
+
+<div class="sticky-buy" id="sticky"></div>
+
+<footer id="site-footer"></footer>
+<nav id="bottomnav" class="bottomnav"></nav>
+<div id="fab"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/products-live-data.js"></script>
+<script src="assets/js/products-live.js"></script>
+<script src="assets/js/app.js"></script>
+<script src="assets/js/recolor.js"></script>
+<script>
+let P = null, SEL = { size:null, colour:null };
+let GALIDX = 0;
+const PDP_RECOL = {};   /* "hex|cutout" -> recolored photo (dataURL) */
+let pdpSeq = 0;
+const BASE_IDS = {CR101:1,CR102:1,LW201:1,LW202:1,LW203:1,WB301:1,WB302:1,TS301:1,TS302:1,MS401:1,MS402:1,MB501:1,MB502:1};
+
+function origColour(){ return (P.colours && P.colours[0]) || {n:"Default", h:"#CCCCCC"}; }
+function selColourObj(){ return (P.colours || []).find(c=>c.n===SEL.colour) || origColour(); }
+
+/* gallery ki photo ke badle uska transparent cutout — rang usi par saaf badalta hai */
+function cutoutFor(g){
+  const v = P.views || {};
+  const frontCut = v.front || (BASE_IDS[P.id] ? "assets/img/cutouts/front/" + P.id + ".webp" : null);
+  if (g === P.gallery[0] || g === P.img) return frontCut;
+  if (g.indexOf("assets/img/views/") > -1 && /-side\./.test(g)) return v.side || null;
+  if (g.indexOf("assets/img/views/") > -1 && /-back\./.test(g)) return v.back || null;
+  if (g === "assets/img/c2-corset-lace.jpg") return v.back || null;   /* CR102 ki asal back photo */
+  if (g === "assets/img/a1-tee-back.jpg") return v.back || null;      /* TS301 back */
+  return null;   /* model/lifestyle photo — is par sirf filter lagega */
+}
+function paintMain(){
+  const img = document.getElementById("mainimg"); if(!img || !P) return;
+  const g = P.gallery[GALIDX];
+  const orig = origColour(), sel = selColourObj();
+  img.onerror = null;
+  if (sel.h === orig.h || !window.Recolor){ img.src = g; img.style.filter = ""; img.style.objectFit = ""; return; }
+  const cut = cutoutFor(g);
+  const rec = cut ? PDP_RECOL[sel.h + "|" + cut] : null;
+  if (rec){ img.src = rec; img.style.filter = ""; img.style.objectFit = "contain"; return; }
+  if (cut){
+    img.onerror = function(){ img.onerror = null; img.src = g; img.style.objectFit = ""; img.style.filter = Recolor.colourFilter(orig.h, sel.h); };
+    img.src = cut; img.style.objectFit = "contain"; img.style.filter = Recolor.colourFilter(orig.h, sel.h); return;
+  }
+  img.src = g; img.style.objectFit = ""; img.style.filter = Recolor.colourFilter(orig.h, sel.h);
+}
+function paintThumbs(){
+  const box = document.getElementById("thumbs"); if(!box || !P) return;
+  const orig = origColour(), sel = selColourObj();
+  const active = sel.h !== orig.h && !!window.Recolor;
+  box.innerHTML = P.gallery.map((g,i)=>{
+    let src = g, style = "";
+    if (active){
+      const cut = cutoutFor(g);
+      if (cut){
+        const rec = PDP_RECOL[sel.h + "|" + cut];
+        src = rec || cut;
+        style = "object-fit:contain" + (rec ? "" : ";filter:" + Recolor.colourFilter(orig.h, sel.h));
+      } else {
+        style = "filter:" + Recolor.colourFilter(orig.h, sel.h);
+      }
+    }
+    return `<button class="${i===GALIDX?"on":""}" data-i="${i}" onclick="setThumb(${i})"><img src="${src}" style="${style}" alt=""></button>`;
+  }).join("");
+}
+function setThumb(i){
+  GALIDX = i;
+  document.querySelectorAll("#thumbs button").forEach(b=>b.classList.toggle("on", +b.dataset.i === i));
+  paintMain();
+}
+function applyPDPColour(){
+  const cn = document.getElementById("cname"); if (cn) cn.textContent = SEL.colour;
+  const orig = origColour(), sel = selColourObj();
+  const seq = ++pdpSeq;
+  paintMain(); paintThumbs();
+  if (sel.h === orig.h || !window.Recolor) return;
+  const seen = {};
+  P.gallery.forEach(g=>{
+    const cut = cutoutFor(g); if (!cut || seen[cut]) return; seen[cut] = 1;
+    const key = sel.h + "|" + cut;
+    if (PDP_RECOL[key]) return;
+    Recolor.recolorSrc(cut, orig.h, sel.h, P.id, url=>{
+      if (seq !== pdpSeq || !url) return;
+      PDP_RECOL[key] = url; paintMain(); paintThumbs();
+    });
+  });
+}
+
+function zoom(src){
+  openModal("Product image", `<img src="${src}" style="width:100%;border-radius:10px">`);
+}
+
+function pickSize(s){
+  if(P.stock[s] === 0) return;
+  SEL.size = s;
+  document.querySelectorAll(".size").forEach(b=>b.classList.toggle("on", b.dataset.s===s));
+  refreshSticky();
+}
+function pickColour(c){
+  SEL.colour = c;
+  document.querySelectorAll(".color").forEach(b=>b.classList.toggle("on", b.dataset.c===c));
+  applyPDPColour();   /* kapde ka rang asal me badlo (photo recolor) */
+  refreshSticky();
+}
+function waOrder(){
+  const t = `Hi ${CONFIG.name}! Mujhe ye chahiye:\n\n*${P.name}*\nSize: ${SEL.size}\nColour: ${SEL.colour}\nPrice: ${money(P.price)} (SKU ${P.id})\n\nPlease confirm availability.`;
+  location.href = waUrl(t);
+}
+function refreshSticky(){
+  const out = P.stock[SEL.size] === 0;
+  const bar = document.getElementById("sticky");
+  if(bar) bar.innerHTML = `
+    <button class="btn wa" onclick="waOrder()">🅦 Order on WhatsApp</button>
+    <button class="btn" onclick="doAdd()" ${out?"disabled":""}>${out?"Out of stock":"Add to Cart"}</button>`;
+  const b = document.getElementById("addbtn");
+  if(b){ b.disabled = out; b.textContent = out ? "Size out of stock" : "Add to Cart"; }
+}
+function doAdd(){ addToCart(P.id, SEL.size, SEL.colour, 1); }
+function buyNow(){ doAdd(); location.href = "cart.html"; }
+
+/* Delivery countdown — har second update */
+function startCountdown(){
+  const el = document.getElementById("cd"); if(!el) return;
+  const tick = () => {
+    const d = deliveryInfo();
+    el.textContent = countdownText(d.msLeft);
+    el.classList.toggle("live", d.msLeft < 4 * 3600 * 1000);
+  };
+  tick(); setInterval(tick, 1000);
+}
+
+function checkPin(){
+  const v = (document.getElementById("pin").value||"").trim();
+  const el = document.getElementById("pinres");
+  if(!/^\d{6}$/.test(v)){ el.innerHTML = `<span style="color:#B3261E">Sahi 6-digit pincode daalein</span>`; return; }
+  // Demo logic — real site me courier API se serviceability check hogi
+  const ok = true;
+  const days = (parseInt(v[0]) <= 3) ? "2–4" : "3–6";
+  el.innerHTML = `<span style="color:var(--ok)">✔ Delivery available — ${days} working days · COD ${CONFIG.codAvailable?"available":"not available"}</span>`;
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+  injectChrome("shop.html");
+  const id = qs.get("id") || PRODUCTS[0].id;
+  P = productById(id);
+  if(!P){ location.href = "shop.html"; return; }
+
+  SEL.size = P.sizes.find(s => P.stock[s] > 0) || P.sizes[0];
+  SEL.colour = P.colours[0].n;
+
+  const D = deliveryInfo();
+  addRecent(P.id);
+
+  document.title = P.name + " — VastraWave";
+  document.getElementById("crumb").innerHTML =
+    `<a href="clothesline.html">Home</a> / <a href="shop.html?cat=${encodeURIComponent(P.category)}">${P.category}</a> / ${esc(P.name)}`;
+
+  // Gallery — colour ke hisaab se photo ka rang badalta hai (paintMain/paintThumbs)
+  document.getElementById("mainimg").alt = P.name;
+  GALIDX = 0;
+  paintMain(); paintThumbs();
+
+  // Info block
+  const chart = SIZE_CHART[P.chartKey || P.category];
+  document.getElementById("info").innerHTML = `
+    ${P.badge ? `<span class="badge" style="position:static;display:inline-block;margin-bottom:8px">${esc(P.badge)}</span>` : ""}
+    <h1>${esc(P.name)}</h1>
+    <div class="rating" style="margin:6px 0 10px">
+      <span class="stars">★★★★★</span> <b>${P.rating}</b> <span>(${P.reviews} reviews)</span>
+      <span class="muted">·</span> <span class="muted">SKU ${P.id}</span>
+    </div>
+    <div class="price" style="margin-bottom:12px">
+      <span class="now" style="font-size:26px">${money(P.price)}</span>
+      <span class="mrp">${money(P.mrp)}</span>
+      <span class="off">${offPct(P)}% off</span>
+      <span class="tiny muted">incl. of all taxes</span>
+    </div>
+
+    <div class="prepaid">⚡ Extra ${CONFIG.prepaidPercent}% OFF on prepaid orders (UPI / Card)</div>
+
+    <div class="trustrow">
+      <div><span class="ti">🚚</span><b>Free shipping</b>above ${money(CONFIG.freeShippingAbove)}</div>
+      <div><span class="ti">🔄</span><b>7-day exchange</b>size issue par free</div>
+      <div><span class="ti">💵</span><b>COD available</b>most pincodes par</div>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <div class="spread" style="margin-bottom:6px">
+        <b style="font-size:13.5px">Colour: <span id="cname">${SEL.colour}</span></b>
+      </div>
+      <div class="colors">
+        ${P.colours.map(c=>`<button class="color ${c.n===SEL.colour?"on":""}" data-c="${c.n}" onclick="pickColour('${c.n}')">
+          <span class="dot" style="background:${c.h}"></span>${c.n}</button>`).join("")}
+      </div>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <div class="spread" style="margin-bottom:6px">
+        <b style="font-size:13.5px">Select size</b>
+        ${chart ? `<a href="javascript:sizeChart('${P.category}')" style="font-size:12.5px;color:var(--brand);font-weight:600">Size chart →</a>` : ""}
+      </div>
+      <div class="sizes">
+        ${P.sizes.map(s=>{
+          const out = P.stock[s] === 0;
+          return `<button class="size ${s===SEL.size?"on":""} ${out?"out":""}" data-s="${s}" onclick="pickSize('${s}')">${s}</button>`;
+        }).join("")}
+      </div>
+      <div class="tiny muted" style="margin-top:6px">${esc(P.model)}</div>
+    </div>
+
+    <div class="row" style="gap:10px; margin-bottom:12px">
+      <button class="btn" id="addbtn" onclick="doAdd()" style="flex:1">Add to Cart</button>
+      <button class="btn ghost" onclick="buyNow()" style="flex:1">Buy Now</button>
+    </div>
+    <a href="https://wa.me/${CONFIG.phone}" target="_blank" class="btn wa" style="margin-bottom:14px">🅦 Size confirm karein — WhatsApp par poochhein</a>
+
+    <div class="pincode">
+      <input id="pin" type="text" inputmode="numeric" maxlength="6" placeholder="Enter pincode">
+      <button class="btn sm ghost" onclick="checkPin()" style="height:42px">Check</button>
+    </div>
+    <div id="pinres" class="tiny" style="margin-top:6px"></div>
+
+    <div class="delivery">
+      <div class="d1">🚛 Delivery between ${D.from} and ${D.to}</div>
+      <div class="d2">Dispatch ${D.beforeCut ? "<b>today</b>" : "tomorrow"} (${D.dispatch}) · Order within</div>
+      <span class="countdown" id="cd">--:--:--</span>
+    </div>
+
+    <div class="acc">
+      <details open><summary>Product details <span>+</span></summary>
+        <div class="acc-body">${esc(P.desc)}
+          <ul style="margin-top:8px">${P.highlights.map(h=>`<li>${esc(h)}</li>`).join("")}</ul>
+        </div>
+      </details>
+      <details><summary>Fabric &amp; care <span>+</span></summary>
+        <div class="acc-body"><b>Fabric:</b> ${esc(P.fabric)}<br><b>Care:</b> ${esc(P.care)}${P.blouse?`<br><b>Included:</b> ${esc(P.blouse)}`:""}</div>
+      </details>
+      <details><summary>Shipping &amp; returns <span>+</span></summary>
+        <div class="acc-body">
+          • Dispatch in 24 hours, delivery in ${CONFIG.deliveryText}.<br>
+          • Free shipping on orders above ${money(CONFIG.freeShippingAbove)}, otherwise ${money(CONFIG.shippingCharge)}.<br>
+          • <b>7-day easy size exchange</b> — product unused aur tags ke saath ho to.<br>
+          • COD available on most pincodes; COD orders par confirmation call/WhatsApp aayega.
+        </div>
+      </details>
+    </div>
+  `;
+
+  // Reviews (demo)
+  const rs = REVIEWS[P.id] || [];
+  document.getElementById("reviews").innerHTML = rs.length
+    ? rs.map(r=>`<div class="rev"><div class="who">${esc(r.who)} <span class="muted tiny">· ${esc(r.city)}</span></div>
+        <div class="stars" style="color:var(--gold);font-size:12.5px">${"★".repeat(r.stars)}${"☆".repeat(5-r.stars)}</div>
+        <div class="txt">${esc(r.txt)}</div></div>`).join("")
+    : `<div class="rev muted">Is product par abhi koi review nahi aaya. Pehla review aap likhein!</div>`;
+
+  // Related
+  const rel = PRODUCTS.filter(p=>p.category===P.category && p.id!==P.id).slice(0,4);
+  const fill = PRODUCTS.filter(p=>p.category!==P.category && p.gender===P.gender).slice(0, 4 - rel.length);
+  paintGrid(document.getElementById("related"), rel.concat(fill));
+
+  // Recently viewed
+  const rec = getRecent(P.id);
+  const rsec = document.getElementById("recentsec");
+  if(rec.length) paintGrid(document.getElementById("recentgrid"), rec);
+  else rsec.style.display = "none";
+
+  refreshSticky();
+  startCountdown();
+});
+</script>
+</body>
+</html>

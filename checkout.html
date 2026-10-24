@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checkout — VastraWave</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%237A1F2B'/><text x='50' y='70' font-size='60' font-family='serif' fill='%23C9A227' text-anchor='middle'>V</text></svg>">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/style-vivid.css">
+</head>
+<body>
+
+<header id="site-header" class="top"></header>
+
+<main class="wrap">
+  <div class="crumb"><a href="clothesline.html">Home</a> / <a href="cart.html">Cart</a> / Checkout</div>
+  <h1 style="font-size:22px; margin:6px 0 14px">Checkout</h1>
+
+  <div class="checkout-grid">
+    <div>
+      <div class="form" id="form">
+        <h3 style="font-size:15px; margin-bottom:12px">1. Delivery details</h3>
+        <div class="field two">
+          <div><label>Full name *</label><input id="f-name" placeholder="Priya Sharma"><div class="err" id="e-name">Naam daalein</div></div>
+          <div><label>Mobile number *</label><input id="f-phone" inputmode="numeric" maxlength="10" placeholder="9876543210"><div class="err" id="e-phone">Sahi 10-digit number daalein</div></div>
+        </div>
+        <div class="field"><label>Email (optional)</label><input id="f-email" placeholder="you@email.com"></div>
+        <div class="field"><label>Full address *</label><textarea id="f-addr" placeholder="House no, street, landmark"></textarea><div class="err" id="e-addr">Address daalein</div></div>
+        <div class="field two">
+          <div><label>City *</label><input id="f-city" value="Surat"><div class="err" id="e-city">City daalein</div></div>
+          <div><label>Pincode *</label><input id="f-pin" inputmode="numeric" maxlength="6" placeholder="395001"><div class="err" id="e-pin">Sahi 6-digit pincode daalein</div></div>
+        </div>
+        <div class="field"><label>State</label><input id="f-state" value="Gujarat"></div>
+      </div>
+
+      <div class="form" style="margin-top:14px">
+        <h3 style="font-size:15px; margin-bottom:12px">2. Payment method</h3>
+        <label class="payopt on" id="po-cod" onclick="pickPay('cod')">
+          <input type="radio" name="pay" value="cod" checked>
+          <span><span class="pt">Cash on Delivery</span><span class="pd">Cash/UPI pay karein jab parcel aaye. COD orders par confirmation WhatsApp aayega.</span></span>
+        </label>
+        <label class="payopt" id="po-upi" onclick="pickPay('upi')">
+          <input type="radio" name="pay" value="upi">
+          <span><span class="pt">UPI (GPay / PhonePe / Paytm)</span><span class="pd">Secure UPI collect request — Razorpay.</span></span>
+        </label>
+        <label class="payopt" id="po-card" onclick="pickPay('card')">
+          <input type="radio" name="pay" value="card">
+          <span><span class="pt">Card / Netbanking / Wallets</span><span class="pd">Secure payment gateway — hum card details store nahi karte.</span></span>
+        </label>
+        <div class="tiny muted">🔒 Razorpay secured checkout. Card details humare server par kabhi store nahi hote (PCI-DSS compliant gateway).</div>
+      </div>
+
+      <div class="form" style="margin-top:14px; text-align:center">
+        <h3 style="font-size:15px; margin-bottom:8px">Ya phir direct WhatsApp par order karein</h3>
+        <p class="tiny muted" style="margin:0 0 10px">Bina form bhare — poora order WhatsApp par bhej dein, hum confirm kar denge.</p>
+        <button class="btn wa" onclick="orderOnWhatsApp()">🅦 Send order on WhatsApp</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="summary" id="summary"></div>
+      <button class="btn" style="margin-top:12px" onclick="placeOrder()">Place order</button>
+      <div class="tiny muted" style="margin-top:8px">Order place karte hi aapko confirmation SMS/WhatsApp milega.</div>
+    </div>
+  </div>
+</main>
+
+<footer id="site-footer"></footer>
+<nav id="bottomnav" class="bottomnav"></nav>
+<div id="fab"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/products-live-data.js"></script>
+<script src="assets/js/products-live.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+let PAY = "cod";
+function pickPay(v){
+  PAY = v;
+  ["cod","upi","card"].forEach(k=>{
+    document.getElementById("po-"+k).classList.toggle("on", k===v);
+    document.getElementById("po-"+k).querySelector("input").checked = (k===v);
+  });
+  renderSummary();
+}
+/* COD chhod kar prepaid choose karne par extra 5% off */
+function prepaidNow(){
+  const t = totals();
+  return PAY === "cod" ? 0 : prepaidOff(t.subtotal - t.discount);
+}
+
+function renderSummary(){
+  const t = totals();
+  const pre = prepaidNow();
+  const box = document.getElementById("summary");
+  if(!t.items.length){
+    box.innerHTML = `<div class="center" style="padding:20px 0"><p class="muted">Cart khali hai.</p>
+      <a href="shop.html" class="btn sm ghost">Shop now</a></div>`;
+    return;
+  }
+  box.innerHTML = `
+    <h3 style="font-size:15px;margin-bottom:10px">Order summary</h3>
+    ${t.items.map(i=>`<div class="l"><span>${esc(i.name)}<br><span class="tiny muted">${esc(i.size)} · ${esc(i.colour)} × ${i.qty}</span></span><span>${money(i.price*i.qty)}</span></div>`).join("")}
+    <div class="l" style="border-top:1px dashed var(--line);margin-top:8px;padding-top:8px"><span>Subtotal</span><span>${money(t.subtotal)}</span></div>
+    ${t.discount?`<div class="l"><span>Coupon ${CONFIG.coupon.code}</span><span style="color:var(--ok)">− ${money(t.discount)}</span></div>`:""}
+    ${pre?`<div class="l"><span>Prepaid discount (${CONFIG.prepaidPercent}%)</span><span style="color:var(--ok)">− ${money(pre)}</span></div>`
+         :`<div class="l"><span class="tiny muted">Prepaid choose karein — extra ${CONFIG.prepaidPercent}% off</span><span class="tiny muted">− ${money(prepaidOff(t.subtotal - t.discount))}</span></div>`}
+    <div class="l"><span>Shipping</span><span>${t.shipping?money(t.shipping):"FREE"}</span></div>
+    <div class="l total"><span>Total payable</span><span>${money(t.total - pre)}</span></div>`;
+}
+
+function orderOnWhatsApp(){
+  const t = totals();
+  if(!t.items.length){ toast("Pehle cart me kuch add karein"); return; }
+  const lines = t.items.map(i=>`• ${i.name} (${i.size}, ${i.colour}) × ${i.qty} = ${money(i.price*i.qty)}`).join("\n");
+  const msg = `Hi ${CONFIG.name}! Mujhe order karna hai:\n\n${lines}\n\nSubtotal: ${money(t.subtotal)}\nTotal: ${money(t.total)}\n\nPlease confirm availability & delivery.`;
+  location.href = waUrl(msg);
+}
+
+function validate(){
+  let ok = true;
+  const chk = (id, test) => {
+    const el = document.getElementById(id);
+    const e = document.getElementById("e-" + id.slice(2));
+    if(!e) return;
+    const good = test(el.value.trim());
+    e.classList.toggle("show", !good); ok = ok && good;
+    return good;
+  };
+  ok = chk("f-name", v=>v.length > 2) && ok;
+  ok = chk("f-phone", v=>/^[6-9]\d{9}$/.test(v)) && ok;
+  ok = chk("f-addr", v=>v.length > 8) && ok;
+  ok = chk("f-city", v=>v.length > 1) && ok;
+  ok = chk("f-pin", v=>/^\d{6}$/.test(v)) && ok;
+  return ok;
+}
+
+function placeOrder(){
+  const t = totals();
+  if(!t.items.length){ toast("Cart khali hai"); return; }
+  if(!validate()){ toast("Form me kuch details missing hain"); return; }
+
+  const pre = prepaidNow();
+  const wt = t.items.reduce((s,i)=>{ const p = productById(i.id); return s + ((p && p.wt) || 250) * i.qty; }, 0) + (CONFIG.packagingWeight || 50);
+  const pcs = t.items.reduce((s,i)=>s + i.qty, 0);
+
+  const order = {
+    id: "VS" + Date.now().toString().slice(-7),
+    weight: wt, pieces: pcs, courier: CONFIG.couriers[0], awb: "",
+    date: new Date().toLocaleString("en-IN"),
+    name: document.getElementById("f-name").value.trim(),
+    phone: document.getElementById("f-phone").value.trim(),
+    address: document.getElementById("f-addr").value.trim() + ", " + document.getElementById("f-city").value.trim()
+             + ", " + document.getElementById("f-state").value.trim() + " - " + document.getElementById("f-pin").value.trim(),
+    pay: PAY.toUpperCase(),
+    items: t.items.map(i=>`${i.name} (${i.size}/${i.colour}) ×${i.qty}`),
+    subtotal: t.subtotal, discount: t.discount + pre, prepaid: pre,
+    shipping: t.shipping, total: t.total - pre,
+    status: "Placed"
+  };
+  saveOrder(order);
+  clearCart();
+  location.href = "success.html?order=" + order.id;
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+  injectChrome("cart.html");
+  renderSummary();
+});
+</script>
+</body>
+</html>

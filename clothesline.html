@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Clothesline — VastraWave</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%237A1F2B'/><text x='50' y='70' font-size='60' font-family='serif' fill='%23C9A227' text-anchor='middle'>V</text></svg>">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/style-vivid.css">
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;overscroll-behavior:none;background:#2B1055}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+  #scene{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+  #scene.grabbing{cursor:grabbing}
+
+  /* ---------- HEADER (logo + brand) ---------- */
+  :root{--announceH:38px}
+  .site-header{position:fixed;top:0;left:0;right:0;height:66px;z-index:40;display:flex;align-items:center;
+       justify-content:space-between;padding:0 16px;gap:12px;
+       background:linear-gradient(180deg,rgba(26,8,32,.82),rgba(26,8,32,.58));backdrop-filter:blur(14px);
+       border-bottom:1px solid rgba(255,211,110,.45);box-shadow:0 10px 30px rgba(20,4,24,.35)}
+  .brandwrap{display:flex;align-items:center;gap:11px;text-decoration:none;min-width:0}
+  .brand-logo{width:46px;height:46px;border-radius:13px;box-shadow:0 8px 20px rgba(224,36,94,.45);flex:none}
+  .brand-txt{display:flex;flex-direction:column;min-width:0}
+  .brand-name{font-size:23px;font-weight:900;letter-spacing:.02em;color:#fff;line-height:1.02;white-space:nowrap}
+  .brand-name .wave{background:linear-gradient(90deg,#FFD36E,#FB8C00 55%,#FF8FA3);
+       -webkit-background-clip:text;background-clip:text;color:transparent}
+  .brand-tag{font-size:9.5px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,.75);margin-top:3px;white-space:nowrap}
+  .header-actions{display:flex;gap:8px;align-items:center;flex:none}
+  @media(max-width:600px){:root{--announceH:34px}.site-header{height:58px;padding:0 12px}
+       .brand-logo{width:38px;height:38px;border-radius:11px}.brand-name{font-size:19px}.brand-tag{font-size:8px;letter-spacing:.18em}}
+
+  /* ---------- ANNOUNCEMENT BAR (offers, chalta hua ticker) ---------- */
+  .announcebar{position:fixed;left:0;right:0;bottom:var(--posterH,128px);height:var(--announceH);z-index:26;
+       background:linear-gradient(90deg,#150818,#3A0D16 30%,#150818);color:#FFD36E;overflow:hidden;
+       display:flex;align-items:center;border-top:1px solid rgba(255,211,110,.55);
+       box-shadow:0 -8px 24px rgba(20,4,24,.4)}
+  .announce-track{display:inline-flex;white-space:nowrap;width:max-content;will-change:transform;
+       animation:announceScroll 26s linear infinite}
+  .announce-track span{padding:0 28px;font-size:12.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+  .announce-track .hi{color:#fff}
+  @keyframes announceScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  @media(max-width:600px){.announce-track span{font-size:11px;padding:0 20px}}
+
+  /* ---------- POSTER (niche bada banner) ---------- */
+  :root{--posterH:128px}
+  @media(max-width:600px){:root{--posterH:104px}}
+  .poster{position:fixed;left:0;right:0;bottom:0;height:var(--posterH);z-index:25;
+          background:linear-gradient(95deg,#3A0D16,#7A1F2B 28%,#E0245E 58%,#FB8C00 88%,#FFD36E);
+          background-size:220% 100%;animation:posterShift 9s ease-in-out infinite alternate;
+          box-shadow:0 -14px 44px rgba(20,4,24,.5);border-top:3px solid rgba(255,211,110,.85);
+          display:flex;align-items:center;overflow:hidden}
+  @keyframes posterShift{from{background-position:0% 50%}to{background-position:100% 50%}}
+  .poster::before{content:"✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧";position:absolute;top:8px;left:14px;color:rgba(255,255,255,.28);
+          font-size:13px;letter-spacing:14px;pointer-events:none}
+  .poster-inner{width:100%;max-width:1280px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;gap:16px}
+  .poster-badge{background:#FFD36E;color:#3A2708;font-weight:900;font-size:15px;padding:12px 14px;border-radius:16px;
+          transform:rotate(-4deg);box-shadow:0 10px 24px rgba(0,0,0,.35);white-space:nowrap;text-align:center;line-height:1.15}
+  .poster-badge small{display:block;font-size:10px;letter-spacing:.08em}
+  .poster-txt{flex:1;min-width:0;color:#fff}
+  .poster-big{font-weight:900;font-size:clamp(22px,4.2vw,44px);line-height:1;letter-spacing:.01em;
+          text-shadow:0 3px 0 rgba(58,13,22,.55),0 10px 28px rgba(0,0,0,.35);white-space:nowrap}
+  .poster-big .off{color:#FFD36E}
+  .poster-sub{margin-top:7px;font-size:clamp(11px,1.5vw,14px);font-weight:700;color:rgba(255,255,255,.92);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .poster-cta{background:#fff;color:#7A1F2B;text-decoration:none;font-weight:900;font-size:clamp(13px,1.8vw,17px);
+          padding:14px 20px;border-radius:99px;box-shadow:0 12px 28px rgba(0,0,0,.35);white-space:nowrap;transition:.18s}
+  .poster-cta:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 16px 34px rgba(0,0,0,.42)}
+  @media(max-width:600px){.poster-badge{font-size:12px;padding:9px 10px}.poster-cta{padding:11px 13px}.poster-inner{gap:10px;padding:10px 12px}}
+  .chip{background:rgba(28,12,40,.55);backdrop-filter:blur(12px);color:#fff;border:1px solid rgba(255,255,255,.22);
+        border-radius:99px;padding:8px 14px;font-size:13px;font-weight:700;text-decoration:none;display:inline-flex;
+        align-items:center;gap:7px;white-space:nowrap;transition:transform .18s, box-shadow .18s}
+  .chip:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(224,36,94,.35)}
+  .chip.brand{background:linear-gradient(100deg,#7A1F2B,#E0245E);border-color:transparent}
+  .chip.brand .mark{display:grid;place-items:center;width:22px;height:22px;border-radius:7px;background:#FFD36E;
+        color:#3A2708;font-weight:900;font-size:13px}
+  #cartBtn{position:relative}
+  #cartcount{position:absolute;top:-6px;right:-6px;min-width:19px;height:19px;padding:0 5px;border-radius:99px;
+        background:#FFD36E;color:#3A2708;font-size:11px;font-weight:900;display:none;place-items:center;line-height:19px}
+  .ghostbtn{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;border-radius:99px;
+        padding:8px 13px;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;transition:.18s}
+  .ghostbtn:hover{background:rgba(255,255,255,.24);transform:translateY(-1px)}
+  .ghostbtn.on{background:linear-gradient(100deg,#FFD36E,#FB8C00);border-color:transparent;color:#3A2708}
+
+  /* ---------- hover tooltip ---------- */
+  #tip{position:fixed;z-index:30;pointer-events:none;opacity:0;transform:translate(-50%,-118%) scale(.94);
+       background:#fff;color:#111;border-radius:14px;padding:10px 13px;box-shadow:0 14px 36px rgba(0,0,0,.4);
+       font-size:12.5px;line-height:1.4;max-width:220px;transition:opacity .14s, transform .14s;white-space:nowrap;
+       border:2px solid transparent}
+  #tip.show{opacity:1;transform:translate(-50%,-125%) scale(1)}
+  #tip b{display:block;font-size:13.5px;margin-bottom:3px;white-space:normal}
+  #tip .pr{font-weight:900;font-size:15px}
+  #tip .mrp{text-decoration:line-through;color:#9AA1AA;font-size:11.5px;margin-left:5px}
+  #tip .cta{margin-top:5px;font-size:11px;color:#6B7280;white-space:nowrap}
+
+  #ctoast{position:fixed;left:50%;bottom:calc(var(--posterH,128px) + var(--announceH,38px) + 18px);transform:translateX(-50%) translateY(16px);z-index:90;
+          background:linear-gradient(100deg,#7A1F2B,#E0245E);color:#fff;padding:12px 20px;border-radius:99px;
+          font-size:13.5px;font-weight:700;opacity:0;pointer-events:none;box-shadow:0 12px 32px rgba(0,0,0,.45);
+          white-space:nowrap;max-width:92vw}
+  #loadbar{position:fixed;top:0;left:0;height:3px;z-index:95;width:0;transition:width .3s;
+           background:linear-gradient(90deg,#FFD36E,#E0245E,#B14AED)}
+
+  /* ================= QUICK VIEW (3D 360) ================= */
+  .qv{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:14px;
+      background:rgba(18,8,28,.66);backdrop-filter:blur(7px)}
+  .qv.on{display:flex}
+  .qv-card{background:#fff;border-radius:20px;width:100%;max-width:880px;max-height:92vh;overflow:auto;
+           display:grid;grid-template-columns:1.05fr .95fr;box-shadow:0 30px 80px rgba(0,0,0,.55)}
+  @media(max-width:780px){.qv-card{grid-template-columns:1fr;max-height:94vh}}
+
+  .qv-left{background:linear-gradient(165deg,#FFF3E6,#FFE3EE 50%,#E7E9FF);padding:16px;
+           display:flex;flex-direction:column;align-items:center;position:relative}
+  .qv-right{padding:20px 22px;display:flex;flex-direction:column}
+  .qv-close{position:absolute;top:10px;right:12px;z-index:5;border:0;background:rgba(0,0,0,.08);width:32px;height:32px;
+            border-radius:50%;cursor:pointer;font-size:15px}
+  .qv-close:hover{background:rgba(0,0,0,.16)}
+
+  .stage{perspective:1100px;width:100%;height:300px;display:grid;place-items:center;position:relative;
+         cursor:grab;touch-action:none;user-select:none;margin:6px 0}
+  .stage:active{cursor:grabbing}
+  .obj{width:min(260px,76vw);height:300px;position:relative;transform-style:preserve-3d;will-change:transform}
+  .view3d{position:absolute;inset:0;display:grid;place-items:center;background:transparent}
+  .view3d img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;
+        -webkit-user-drag:none;user-select:none;
+        filter:drop-shadow(0 22px 24px rgba(45,12,45,.32))}
+  .view3d .tint{display:none;position:absolute;inset:0;mix-blend-mode:multiply;opacity:.22;pointer-events:none;transition:background .25s;
+        -webkit-mask-repeat:no-repeat;-webkit-mask-position:center;-webkit-mask-size:contain;
+        mask-repeat:no-repeat;mask-position:center;mask-size:contain}
+  .angle-label{position:absolute;left:50%;bottom:2px;transform:translateX(-50%);z-index:3;pointer-events:none;
+        background:rgba(27,14,20,.82);color:#FFD36E;border:1px solid rgba(255,211,110,.5);
+        padding:5px 11px;border-radius:99px;font-size:10.5px;font-weight:900;letter-spacing:.14em;white-space:nowrap}
+  .qv-info{max-width:310px;text-align:center;font-size:11.5px;line-height:1.5;color:#75656c;margin-top:8px}
+  .qv-tools{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:4px}
+  .qv-tools button{border:1px solid rgba(0,0,0,.14);background:#fff;border-radius:99px;padding:7px 13px;
+        font-size:12px;font-weight:700;cursor:pointer}
+  .qv-tools button:hover{background:#FFF0F5}
+  .qv-tools button.on{background:linear-gradient(100deg,#7A1F2B,#E0245E);color:#fff;border-color:transparent}
+  .spin-hint{font-size:11px;color:#7A6A70;margin-top:6px;letter-spacing:.04em}
+
+  .qv h3{margin:0 0 4px;font-size:20px;line-height:1.25;font-weight:800}
+  .qv .cat{font-size:11px;text-transform:uppercase;letter-spacing:.12em;font-weight:800;margin-bottom:8px}
+  .qv .prices{display:flex;align-items:baseline;gap:9px;margin:6px 0 14px}
+  .qv .prices .p{font-size:26px;font-weight:900;color:#7A1F2B}
+  .qv .prices .m{text-decoration:line-through;color:#9AA1AA}
+  .qv .prices .o{background:#E6F6F1;color:#00897B;font-weight:800;padding:3px 8px;border-radius:99px;font-size:12px}
+  .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:800;color:#6B7280;margin:14px 0 7px}
+  .swatches{display:flex;gap:9px;flex-wrap:wrap}
+  .sw{width:38px;height:38px;border-radius:50%;cursor:pointer;border:3px solid #EDE8EA;position:relative;transition:.16s}
+  .sw:hover{transform:scale(1.08)}
+  .sw.on{border-color:#1B0E14;box-shadow:0 0 0 2px #fff inset, 0 6px 14px rgba(0,0,0,.25);transform:scale(1.08)}
+  .sw.out{opacity:.35;cursor:not-allowed}
+  .sw.out::after{content:"";position:absolute;inset:0;border-radius:50%;
+        background:linear-gradient(45deg,transparent 45%,#B3261E 45%,#B3261E 55%,transparent 55%)}
+  .sizes{display:flex;gap:7px;flex-wrap:wrap}
+  .sz{min-width:46px;padding:9px 11px;border:1.5px solid #DED8DB;border-radius:10px;background:#fff;
+      font-size:13px;font-weight:700;cursor:pointer;transition:.16s}
+  .sz:hover{border-color:#7A1F2B}
+  .sz.on{background:linear-gradient(100deg,#7A1F2B,#E0245E);color:#fff;border-color:transparent}
+  .sz.out{opacity:.35;text-decoration:line-through;cursor:not-allowed}
+  .qrow{display:flex;gap:9px;margin-top:18px}
+  .qrow .btn{flex:1;text-align:center;padding:13px;border-radius:12px;text-decoration:none;font-weight:800;font-size:14px}
+  .btn-cart{background:linear-gradient(100deg,#7A1F2B,#E0245E);color:#fff;border:0;cursor:pointer}
+  .btn-det{background:#fff;border:1.5px solid #DED8DB;color:#1B0E14}
+  .meta-line{font-size:12.5px;color:#6B7280;margin-top:12px;line-height:1.6}
+
+  #fallback{display:none;position:fixed;inset:0;z-index:120;overflow:auto;background:#fff;padding:20px}
+  #fallback.on{display:block}
+  #fallback .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;max-width:1000px;margin:60px auto 0}
+  #fallback img{width:100%;border-radius:12px;aspect-ratio:3/4;object-fit:cover}
+  @media(max-width:600px){.chip{padding:7px 11px;font-size:12px}}
+</style>
+</head>
+<body>
+
+<canvas id="scene"></canvas>
+<div id="loadbar"></div>
+
+<!-- ============ HEADER: logo + brand ============ -->
+<header class="site-header" id="siteHeader">
+  <a class="brandwrap" href="clothesline.html">
+    <img class="brand-logo" src="assets/img/logo-vastrawave.svg" alt="VastraWave logo">
+    <span class="brand-txt">
+      <span class="brand-name" id="brandName">Vastra<span class="wave">Wave</span></span>
+      <span class="brand-tag">Fashion ki nayi lehar</span>
+    </span>
+  </a>
+  <div class="header-actions">
+    <a href="shop.html" class="chip">🛍️ Shop</a>
+    <a href="cart.html" class="chip" id="cartBtn">🛒<span id="cartcount">0</span></a>
+  </div>
+</header>
+
+<!-- ============ ANNOUNCEMENT BAR: offers ============ -->
+<div class="announcebar" id="announcebar">
+  <div class="announce-track" id="announceTrack">
+    <span class="hi">🔥 Festive Sale — Up to 70% OFF</span><span>🚚 ₹999+ Free Shipping</span><span class="hi">💵 COD Available</span><span>✨ New Collection aa gaya</span><span class="hi">↩️ 7-Day Easy Return</span><span>👆 Kapda click karo — 3D me ghoomega</span>
+    <span class="hi">🔥 Festive Sale — Up to 70% OFF</span><span>🚚 ₹999+ Free Shipping</span><span class="hi">💵 COD Available</span><span>✨ New Collection aa gaya</span><span class="hi">↩️ 7-Day Easy Return</span><span>👆 Kapda click karo — 3D me ghoomega</span>
+  </div>
+</div>
+
+<!-- ============ POSTER (niche) ============ -->
+<div class="poster" id="poster">
+  <div class="poster-inner">
+    <div class="poster-badge">🎉 SALE<small>LIVE HAI</small></div>
+    <div class="poster-txt">
+      <div class="poster-big">UP TO <span class="off">70% OFF</span> ✨ NEW COLLECTION</div>
+      <div class="poster-sub">🚚 ₹999+ par FREE shipping &nbsp;·&nbsp; 💵 COD available &nbsp;·&nbsp; ↩️ 7-day easy return &nbsp;·&nbsp; 👆 Upar kapda click karo, 3D me ghumakar dekho</div>
+    </div>
+    <a class="poster-cta" href="shop.html">🛍️ Shop karo →</a>
+  </div>
+</div>
+
+<div id="tip"></div>
+<div id="ctoast"></div>
+
+<!-- ================= QUICK VIEW ================= -->
+<div class="qv" id="qv">
+  <div class="qv-card">
+    <div class="qv-left">
+      <button class="qv-close" onclick="closeQV()">✕</button>
+      <div class="stage" id="stage">
+        <div class="obj" id="obj">
+          <div class="view3d" id="qvView">
+            <img id="qvfImg" src="" alt="" draggable="false">
+            <div class="tint" id="qvfTint"></div>
+          </div>
+        </div>
+        <div class="angle-label" id="qvAngle">FRONT VIEW</div>
+      </div>
+      <div class="qv-tools">
+        <button id="spinBtn" class="on">🔄 Auto ghoom</button>
+        <button onclick="qvRotate(-90)">⟲ Ghumao</button>
+        <button onclick="qvRotate(90)">⟳ Ghumao</button>
+        <button onclick="snapSpin(0)">↺ Front</button>
+        <button onclick="snapSpin(90)">◐ Side</button>
+        <button onclick="snapSpin(180)">↻ Back</button>
+      </div>
+      <div class="spin-hint">🖱️ Mouse / ungli se drag karo — kapda pura 360° ghumega</div>
+      <div class="qv-info" id="qvInfo"></div>
+    </div>
+
+    <div class="qv-right">
+      <div class="cat" id="qvCat">CATEGORY</div>
+      <h3 id="qvName">Product</h3>
+      <div class="prices">
+        <span class="p" id="qvPrice">₹0</span>
+        <span class="m" id="qvMrp"></span>
+        <span class="o" id="qvOff"></span>
+      </div>
+
+      <div class="lbl">Colour — <span id="qvColourName" style="color:#1B0E14"></span></div>
+      <div class="swatches" id="qvSw"></div>
+
+      <div class="lbl">Size</div>
+      <div class="sizes" id="qvSz"></div>
+
+      <div class="qrow">
+        <button class="btn-cart" id="qvAdd">🛒 Add to cart</button>
+        <a class="btn-det" id="qvDet" href="#">Details →</a>
+      </div>
+      <div class="meta-line" id="qvMeta"></div>
+    </div>
+  </div>
+</div>
+
+<div id="fallback">
+  <div style="max-width:1000px;margin:0 auto">
+    <h2>Clothesline view</h2>
+    <p style="color:#6B7280">Physics load nahi ho payi — normal grid.</p>
+    <div class="grid" id="fbgrid"></div>
+  </div>
+</div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/products-live-data.js"></script>
+<script src="assets/js/products-live.js"></script>
+<script src="assets/js/app.js"></script>
+<script src="assets/js/matter.min.js"></script>
+<script src="assets/js/gsap.min.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var canvas = document.getElementById("scene");
+  var ctx = canvas.getContext ? canvas.getContext("2d") : null;
+  var tip = document.getElementById("tip");
+  var W = 0, H = 0, DPR = 1;
+
+  /* ---------- COLOURFUL PALETTE ---------- */
+  var CAT_COLOR = {
+    "Corsets":     "#E0245E",
+    "Ladies Wear": "#B14AED",
+    "Shirts":      "#1E88E5",
+    "T-Shirts":    "#FB8C00",
+    "Bottoms":     "#00897B"
+  };
+  var BOKEH_COLORS = ["#FFD36E","#FF8FB1","#B14AED","#7FE7D4","#FFB86B","#8ECAE6"];
+  function catColor(p){ return CAT_COLOR[p.category] || "#7A1F2B"; }
+
+  /* ---------- PRODUCT FEED ---------- */
+  function loadProducts(){
+    var list = (typeof PRODUCTS !== "undefined" && PRODUCTS) ? PRODUCTS : [];
+    if (window.__LIVE_PRODUCTS && window.__LIVE_PRODUCTS.length) list = window.__LIVE_PRODUCTS;
+    return list.filter(function(p){ return p && p.img; });
+  }
+  function normalizeShopify(json){        // Shopify adapter (example)
+    return (json.products || []).map(function(p){
+      var v = p.variants && p.variants[0];
+      return { id:String(p.id), name:p.title, price:v?+v.price:0,
+               mrp:v&&v.compare_at_price?+v.compare_at_price:0,
+               img:p.images&&p.images[0]?p.images[0].src:"" };
+    });
+  }
+
+  /* ---------- WEBP + LAZY LOAD ---------- */
+  function webpOf(path){ return String(path||"").replace(/\.(jpe?g|png)$/i,".webp").replace("assets/img/","assets/img/webp/"); }
+  var loadedCount = 0, totalTex = 1;
+  function bumpLoader(){
+    loadedCount++;
+    var b = document.getElementById("loadbar");
+    if (b) b.style.width = Math.min(100, Math.round(loadedCount/totalTex*100)) + "%";
+    if (loadedCount >= totalTex) setTimeout(function(){ var x=document.getElementById("loadbar"); if(x) x.style.opacity=0; }, 400);
+  }
+  function frontCutout(p){
+    return (p.views && p.views.front) || p.cutout || ("assets/img/cutouts/front/" + p.id + ".webp");
+  }
+  function loadTex(c, delay){
+    setTimeout(function(){
+      var candidates = [frontCutout(c.p), webpOf(c.p.img), c.p.img];
+      candidates = candidates.filter(function(x, i){ return x && candidates.indexOf(x) === i; });
+      (function tryNext(i){
+        if (i >= candidates.length){ bumpLoader(); return; }
+        var im = new Image();
+        im.onload = function(){ c.img = im; c.texSrc = candidates[i]; bumpLoader(); };
+        im.onerror = function(){ tryNext(i + 1); };
+        im.src = candidates[i];
+      })(0);
+    }, delay || 0);
+  }
+  function fitSize(c){
+    if (!c.img || !c.img.naturalWidth || !c.img.naturalHeight) return { w:(c.bw || CW), h:CH };
+    var maxW = c.rw || CW * 1.22, maxH = CH * 1.10;
+    var sc = Math.min(maxW / c.img.naturalWidth, maxH / c.img.naturalHeight);
+    return { w:c.img.naturalWidth * sc, h:c.img.naturalHeight * sc };
+  }
+  /* har kapde ki asal chaudaai (cutout size se) — isi hisaab se kapde PASS-PASS latkenge:
+     patli dress ko chhoti jagah, chaudi tee ko badi, beech me sirf gapX */
+  var ASPECT = { CR101:195/253, CR102:300/401, LW201:182/442, LW202:260/468, LW203:461/397,
+                 WB301:385/491, WB302:462/379, TS301:490/410, TS302:478/456, MS401:457/504,
+                 MS402:456/477, MB501:230/470, MB502:234/489 };
+  function renderWidth(p){
+    var a = ASPECT[p.id] || 0.75;
+    return Math.min(CW * 1.22, CH * 1.10 * a);
+  }
+  /* EKDAM BAJU-BAJU packing — har kapde ki ASAL shape 16 height-band me naapi hui:
+     l[b]/r[b] = us band me kapda center se baayein/daayein kitna faila hai
+     (apni chaudaai ke fraction me). Padosi ko itna paas latkao ki shapes sat jayein. */
+  var PROFILE = {
+    CR101:{l:[0.415,0.46,0.46,0.435,0.403,0.37,0.342,0.322,0.33,0.37,0.415,0.451,0.468,0.451,0.346,0.188],r:[0.419,0.455,0.455,0.431,0.399,0.37,0.342,0.322,0.33,0.37,0.415,0.447,0.464,0.451,0.342,0.192]},
+    CR102:{l:[0.446,0.471,0.471,0.454,0.429,0.395,0.362,0.337,0.341,0.387,0.429,0.467,0.479,0.462,0.354,0.195],r:[0.441,0.467,0.467,0.45,0.425,0.395,0.362,0.333,0.341,0.383,0.429,0.467,0.475,0.458,0.349,0.19]},
+    LW201:{l:[0.0,0.394,0.439,0.47,0.371,0.28,0.326,0.348,0.371,0.402,0.417,0.432,0.447,0.462,0.47,0.295],r:[0.106,0.356,0.424,0.462,0.379,0.242,0.288,0.326,0.341,0.364,0.379,0.394,0.402,0.417,0.439,0.394]},
+    LW202:{l:[0.135,0.152,0.157,0.169,0.197,0.213,0.236,0.258,0.281,0.298,0.32,0.337,0.365,0.427,0.478,0.449],r:[0.157,0.185,0.185,0.197,0.225,0.236,0.253,0.264,0.287,0.303,0.326,0.354,0.376,0.416,0.472,0.449]},
+    LW203:{l:[0.0,0.0,0.311,0.379,0.428,0.474,0.489,0.485,0.398,0.281,0.33,0.368,0.383,0.281,0.0,0.0],r:[0.0,0.0,0.3,0.375,0.417,0.458,0.485,0.485,0.436,0.274,0.304,0.342,0.357,0.251,0.0,0.0]},
+    WB301:{l:[0.209,0.229,0.245,0.257,0.269,0.285,0.297,0.317,0.337,0.361,0.384,0.412,0.44,0.464,0.484,0.416],r:[0.201,0.221,0.241,0.249,0.261,0.281,0.293,0.317,0.337,0.361,0.384,0.412,0.436,0.464,0.48,0.42]},
+    WB302:{l:[0.0,0.0,0.323,0.338,0.364,0.383,0.406,0.425,0.44,0.451,0.47,0.481,0.489,0.266,0.0,0.0],r:[0.0,0.0,0.3,0.319,0.368,0.372,0.398,0.413,0.428,0.455,0.47,0.481,0.485,0.225,0.0,0.0]},
+    TS301:{l:[0.0,0.0,0.149,0.243,0.311,0.375,0.436,0.489,0.481,0.398,0.338,0.342,0.342,0.342,0.0,0.0],r:[0.0,0.0,0.16,0.247,0.315,0.379,0.443,0.485,0.485,0.398,0.338,0.345,0.345,0.345,0.0,0.0]},
+    TS302:{l:[0.0,0.138,0.308,0.409,0.489,0.481,0.428,0.375,0.308,0.308,0.308,0.308,0.308,0.308,0.308,0.0],r:[0.0,0.126,0.308,0.406,0.485,0.477,0.421,0.364,0.296,0.296,0.296,0.296,0.296,0.296,0.296,0.0]},
+    MS401:{l:[0.1,0.236,0.345,0.383,0.421,0.455,0.489,0.489,0.485,0.47,0.455,0.44,0.409,0.338,0.296,0.126],r:[0.074,0.175,0.296,0.338,0.368,0.398,0.421,0.428,0.451,0.458,0.458,0.462,0.485,0.458,0.281,0.096]},
+    MS402:{l:[0.0,0.119,0.296,0.345,0.375,0.406,0.436,0.462,0.481,0.489,0.489,0.485,0.477,0.481,0.277,0.0],r:[0.0,0.111,0.292,0.338,0.368,0.402,0.432,0.458,0.477,0.485,0.485,0.477,0.474,0.474,0.258,0.0]},
+    MB501:{l:[0.392,0.411,0.424,0.43,0.436,0.443,0.449,0.455,0.455,0.462,0.462,0.468,0.468,0.468,0.468,0.475],r:[0.404,0.424,0.436,0.443,0.449,0.449,0.455,0.455,0.462,0.462,0.468,0.468,0.468,0.468,0.468,0.468]},
+    MB502:{l:[0.363,0.402,0.428,0.441,0.454,0.461,0.467,0.474,0.474,0.474,0.474,0.467,0.454,0.448,0.435,0.408],r:[0.343,0.389,0.415,0.428,0.448,0.454,0.461,0.467,0.467,0.467,0.467,0.461,0.448,0.441,0.428,0.389]}
+  };
+  function stepBetween(pa, pb){
+    var A = PROFILE[pa.id], B = PROFILE[pb.id];
+    var wa = renderWidth(pa), wb = renderWidth(pb);
+    if (!A || !B) return (wa + wb) / 2 + gapX;
+    var m = 0;
+    for (var b = 0; b < 16; b++){
+      var s = A.r[b] * wa + B.l[b] * wb;
+      if (s > m) m = s;
+    }
+    return m * 0.87 + gapX;   /* 0.87 = kapde ek dusre par halka chadh kar, bhare rack jaisa */
+  }
+
+  /* ---------- sizes — DUKAN STYLE: kam kapde, BADE-BADE ---------- */
+  var CW, CH, hanger, ropeY, N, posterH = 128, floorY = 0;
+  /* TRAIN MODE — sab kapde ek line me, hooks rail par slide hote hain */
+  var spacingX = 240, lineLength = 0, trainOffset = 0, trainSpeed = 0.5, trainOn = true, hoverPause = false;
+  var gapX = 12, maxSlot = 240, slotWArr = [], slotBaseArr = [];   /* kapdon ke beech sirf itni jagah */
+  function computeSizes(){
+    posterH = (W <= 600 ? 104 : 128) + (W <= 600 ? 34 : 38);   /* poster + announcement bar */
+    floorY  = H - posterH;
+    N = W >= 1100 ? 5 : W >= 760 ? 4 : W >= 520 ? 3 : 2;
+    var avail = W - 48;
+    CW = Math.max(110, Math.min(260, (avail / N) * 0.88));   /* 0.88 = beech me gap, kapde takrayenge nahi */
+    CH = Math.round(CW * 1.34);
+    hanger = Math.max(26, Math.min(46, Math.round(CW * 0.17)));
+    /* height guard — kapda poster ke andar na ghuse */
+    var usableH = floorY - 84 - hanger - 46;
+    if (CH > usableH && usableH > 120){ CH = Math.round(usableH); CW = Math.round(CH / 1.34); hanger = Math.max(26, Math.min(46, Math.round(CW * 0.17))); }
+    /* rail ko screen ke beech me rakho — upar-niche barabar jagah (poster ke upar tak) */
+    ropeY = Math.max(84, Math.round((floorY - hanger - CH) / 2));
+    gapX = 1;                                                  /* EKDAM BAJU-BAJU: shapes lagbhag chipki hui */
+    spacingX = Math.round(CW + gapX);                          /* fallback/average ke liye */
+    trainSpeed = Math.max(0.3, CW * 0.0025);                  /* ~0.54px/tick desktop = 32px/sec */
+  }
+
+  /* ---------- physics ---------- */
+  var Engine = Matter.Engine, Runner = Matter.Runner, Bodies = Matter.Bodies,
+      Composite = Matter.Composite, Constraint = Matter.Constraint, Mouse = Matter.Mouse,
+      MouseConstraint = Matter.MouseConstraint, Body = Matter.Body, Query = Matter.Query,
+      Events = Matter.Events;
+
+  var CAT_CLOTH = 0x0004, CAT_ROPE = 0x0002, CAT_WALL = 0x0001;
+  var engine, runner, world, rope = [], clothes = [], mConstraint, mouse;
+  var windOn = true, windT = 0, bokeh = [];
+
+  function makeBokeh(){
+    bokeh = [];
+    var n = Math.max(10, Math.round(W / 62));
+    for (var i = 0; i < n; i++) bokeh.push({
+      x: Math.random() * W, y: Math.random() * H,
+      r: 5 + Math.random() * 32,
+      c: BOKEH_COLORS[Math.floor(Math.random() * BOKEH_COLORS.length)],
+      a: 0.05 + Math.random() * 0.11,
+      ph: Math.random() * 6.28
+    });
+  }
+
+  function build(){
+    if (engine) { Runner.stop(runner); Composite.clear(world, false); Engine.clear(engine); }
+    engine = Engine.create(); world = engine.world;
+    engine.gravity.y = 0.5; engine.gravity.x = 0;
+    engine.positionIterations = 8; engine.velocityIterations = 6; engine.constraintIterations = 4;
+    computeSizes(); makeBokeh();
+
+    /* RAIL — dukan wali seedhi metal rail (static, sag nahi hoga).
+       rope[] = rail par ke anchor points; kapde inhi se latakte hain. */
+    rope = [];
+    var segs = Math.max(14, Math.round(W / 22));
+    var spacing = (W - 48) / (segs - 1);
+    for (var i = 0; i < segs; i++)
+      rope.push(Bodies.circle(24 + i * spacing, ropeY, 3, {
+        isStatic:true, collisionFilter:{category:CAT_ROPE, mask:0} }));
+    Composite.add(world, rope);
+
+    /* CLOTHES — SAB product ek lambi line me (screen se bahar tak), train ke dabbe jaise.
+       EKDAM BAJU-BAJU: har kapde ki asal shape (PROFILE) naap kar padosi ko itna paas
+       latkaya hai ki kapdon ke kinare aapas me sat jayein — dabbe (bbox) wali khaali
+       jagah bilkul khatam, dukaan ke bhare hue rack jaisa. */
+    var list = pickProducts();
+    var steps = [], centers = [], rws = [];
+    function computeSteps(){
+      steps = list.map(function(p, i){ return stepBetween(p, list[(i + 1) % list.length]); });
+      centers = []; var acc = 0;
+      for (var i = 0; i < list.length; i++){ centers.push(acc); acc += steps[i]; }
+      lineLength = acc;
+      rws = list.map(function(p){ return renderWidth(p); });
+    }
+    computeSteps();
+    while (list.length && lineLength < W + Math.max.apply(null, rws) * 2){
+      list = list.concat(list); computeSteps();   /* line chhoti ho to loop pura rakho */
+    }
+    slotWArr = steps; slotBaseArr = centers;
+    maxSlot = rws.length ? Math.round(Math.max.apply(null, rws)) : spacingX;
+    spacingX = list.length ? Math.round(lineLength / list.length) : spacingX;
+    trainOffset = maxSlot + Math.round(CW * 0.6);
+    /* body widths: pehle kapde jitna chauda rakho, phir har jode ko check karke
+       itna ghatao ki padosi bodies aapas me ghuse nahi (chipke hue, takrahat nahi) */
+    var bws = list.map(function(p, idx){
+      var prevStep = steps[(idx - 1 + list.length) % list.length];
+      return Math.max(40, Math.min(CW, Math.round(Math.min(rws[idx], (prevStep + steps[idx]) / 2 - 4))));
+    });
+    for (var k = 0; k < list.length; k++){
+      var n2 = (k + 1) % list.length;
+      var excess = (bws[k] + bws[n2]) / 2 - (steps[k] - 3);
+      if (excess > 0){
+        var cut = Math.min(bws[n2] - 40, Math.ceil(excess * 2));
+        if (cut > 0) bws[n2] -= cut;
+        excess = (bws[k] + bws[n2]) / 2 - (steps[k] - 3);
+        if (excess > 0) bws[k] = Math.max(40, bws[k] - Math.ceil(excess * 2));
+      }
+    }
+    totalTex = list.length; loadedCount = 0;
+    clothes = list.map(function (p, idx) {
+      /* har kapde ka APNA hook — yahi hook rail par slide karega (train chalegi) */
+      var ax = trainAnchorX(idx);
+      var rw = rws[idx];
+      var bw = bws[idx];
+      var sC = Bodies.circle(ax, ropeY, 3, { isStatic:true, collisionFilter:{category:CAT_ROPE, mask:0} });
+      var body = Bodies.rectangle(ax, ropeY + hanger + CH/2, bw, CH, {
+        chamfer:{ radius: Math.max(6, bw*0.06) },
+        frictionAir:0.045, restitution:0.04, density:0.0008, friction:0.25,
+        collisionFilter:{ category:CAT_CLOTH, mask:CAT_CLOTH | CAT_WALL }
+      });
+      Composite.add(world, [ sC, body,
+        Constraint.create({ bodyA:sC, bodyB:body, pointB:{x:0, y:-CH/2}, stiffness:1, length:hanger }) ]);
+      var c = { body:body, p:p, img:null, hover:0, target:0, color:catColor(p), sC:sC, idx:idx, phase:idx * 0.85,
+                bw:bw, rw:rw, step:steps[idx], slot:steps[idx], base:centers[idx] };
+      loadTex(c, idx * 80);
+      return c;
+    });
+
+    /* side walls NAHI — train ko ek side se nikal kar dusri side ghusna hai. Floor poori line lamba. */
+    Composite.add(world, [
+      Bodies.rectangle(lineLength/2, floorY+60, lineLength + W*2, 120, {isStatic:true, collisionFilter:{category:CAT_WALL, mask:CAT_CLOTH}})
+    ]);
+
+    mouse = Mouse.create(canvas);
+    mConstraint = MouseConstraint.create(engine, {
+      mouse: mouse,
+      constraint: { stiffness: 0.13, damping: 0.08, render:{visible:false} },
+      collisionFilter: { mask: CAT_CLOTH }
+    });
+    Composite.add(world, mConstraint);
+    Events.on(mConstraint, "startdrag", function(){ canvas.classList.add("grabbing"); });
+    Events.on(mConstraint, "enddrag",   function(){ canvas.classList.remove("grabbing"); });
+    Events.on(engine, "beforeUpdate", windTick);   /* hawa har physics-tick par exactly ek baar — koi double/miss nahi */
+    Events.on(engine, "beforeUpdate", trainTick);  /* train bhi har tick par utna hi aage badhegi */
+
+    runner = Runner.create(); Runner.run(runner, engine);
+
+    var bc = document.getElementById("batchChip");
+    if (bc){ var tot = loadProducts().length;
+      bc.style.display = "inline-flex";
+      bc.textContent = "🚆 " + tot + " kapde line me chal rahe hain"; }
+
+    window.__CLOTHESLINE = { engine:engine, world:world, rope:rope, clothes:clothes,
+      mouseConstraint:mConstraint, sizes:{W:W,H:H,CW:CW,CH:CH,ropeY:ropeY,posterH:posterH,floorY:floorY,N:N,
+        spacingX:spacingX, lineLength:lineLength, trainSpeed:trainSpeed, maxSlot:maxSlot, gapX:gapX},
+      rebuild:build, pick:pickProducts, webpOf:webpOf, frontCutout:frontCutout, buildViews:buildViews, hexToHsl:hexToHsl, shiftPixel:shiftPixel, colourFilter:colourFilter, stepBetween:stepBetween, renderWidth:renderWidth, openQV:openQV,
+      setTrain:function(v){ trainOn = !!v; syncTrainBtn(); },
+      isTrainOn:function(){ return trainOn; },
+      getOffset:function(){ return trainOffset; },
+      setTrainSpeed:function(v){ trainSpeed = v; } };
+  }
+
+  function pickProducts(){ return loadProducts().slice(); }   /* SAB products — train me sab dabbe */
+
+  /* ---------- WIND — smooth lehar, NO random (random = vibration tha) ---------- */
+  function windTick(){
+    windT += 0.008;
+    var amp = windOn ? 0.00007 : 0.000006;
+    for (var i = 0; i < clothes.length; i++){
+      var b = clothes[i].body, ph = clothes[i].phase || 0;
+      var g = (Math.sin(windT * 1.1 + ph) * 0.65 + Math.sin(windT * 0.43 + ph * 1.7) * 0.35) * amp;
+      /* force kapde ke nichle hisse par — hawa me lehrayega jaisa hota hai */
+      Body.applyForce(b, worldPt(b, {x:0, y:CH * 0.28}), { x: g * b.mass, y: 0 });
+    }
+  }
+
+  /* ---------- TRAIN — hooks rail par slide, kapde pendulum ban kar saath chalte hain ---------- */
+  function trainAnchorX(i){
+    if (!lineLength) return 0;
+    var center = slotBaseArr[i] || 0;
+    var u = ((center + trainOffset) % lineLength + lineLength) % lineLength;
+    return u - maxSlot;                        /* screen dono side bahar tak */
+  }
+  function trainTick(){
+    if (!trainOn || !lineLength) return;
+    if (qvP) return;                           /* product khula hai — train ruko */
+    if (mConstraint && mConstraint.body) return;  /* customer kapda kheech raha hai — ruko */
+    if (hoverPause) return;                    /* mouse kapde par hai — ruko taaki click aasan ho */
+    trainOffset -= trainSpeed;                 /* train daayein se baayein chalti hai */
+    for (var i = 0; i < clothes.length; i++){
+      var c = clothes[i];
+      var nx = trainAnchorX(c.idx), ox = c.sC.position.x, dd = nx - ox;
+      if (Math.abs(dd) > lineLength * 0.5)      /* dabba ek side se gayab -> dusri side entry: kapda bhi wahi teleport */
+        Body.setPosition(c.body, { x: c.body.position.x + dd, y: c.body.position.y });
+      Body.setPosition(c.sC, { x: nx, y: ropeY });
+    }
+  }
+  function syncTrainBtn(){
+    var el = document.getElementById("trainBtn");
+    if (el){ el.classList.toggle("on", trainOn); el.textContent = trainOn ? "🚆 Auto line" : "⏸️ Line ruki"; }
+  }
+
+  /* ---------- drawing ---------- */
+  function rr(c,x,y,w,h,r){
+    if (c.roundRect){ c.beginPath(); c.roundRect(x,y,w,h,r); return; }
+    c.beginPath(); c.moveTo(x+r,y); c.lineTo(x+w-r,y); c.quadraticCurveTo(x+w,y,x+w,y+r);
+    c.lineTo(x+w,y+h-r); c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+    c.lineTo(x+r,y+h); c.quadraticCurveTo(x,y+h,x,y+h-r);
+    c.lineTo(x,y+r); c.quadraticCurveTo(x,y,x+r,y); c.closePath();
+  }
+  function worldPt(body, off){
+    var a = body.angle, co = Math.cos(a), si = Math.sin(a);
+    return { x: body.position.x + off.x*co - off.y*si, y: body.position.y + off.x*si + off.y*co };
+  }
+
+  function draw(){
+    if (!ctx) return;
+
+    /* sunset sky */
+    var g = ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,    "#FFB86B");
+    g.addColorStop(0.30, "#FF7E9D");
+    g.addColorStop(0.62, "#A06CD5");
+    g.addColorStop(1,    "#3B2A6B");
+    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+
+    /* sun glow */
+    var sx = W*0.80, sy = ropeY - 20;
+    var sg = ctx.createRadialGradient(sx, sy, 6, sx, sy, 200);
+    sg.addColorStop(0, "rgba(255,238,180,.85)");
+    sg.addColorStop(0.35,"rgba(255,190,120,.28)");
+    sg.addColorStop(1, "rgba(255,190,120,0)");
+    ctx.fillStyle = sg; ctx.fillRect(0,0,W,H);
+
+    /* bokeh */
+    for (var i = 0; i < bokeh.length; i++){
+      var b = bokeh[i];
+      var yy = b.y + Math.sin(windT*0.6 + b.ph) * 8;
+      ctx.globalAlpha = b.a;
+      ctx.fillStyle = b.c;
+      ctx.beginPath(); ctx.arc(b.x, yy, b.r, 0, 6.283); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    /* RAIL — seedhi chamakti metal rod + ceiling supports */
+    if (rope.length > 1){
+      ctx.save();
+      ctx.strokeStyle = "rgba(40,20,50,.35)"; ctx.lineWidth = 3;
+      [W*0.16, W*0.5, W*0.84].forEach(function(x){
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, ropeY); ctx.stroke();
+      });
+      var rg = ctx.createLinearGradient(0, ropeY-5, 0, ropeY+5);
+      rg.addColorStop(0, "#FFF6DC"); rg.addColorStop(0.45, "#E8D9AE");
+      rg.addColorStop(0.55, "#B99B57"); rg.addColorStop(1, "#8A6D2F");
+      ctx.shadowColor = "rgba(0,0,0,.35)"; ctx.shadowBlur = 8; ctx.shadowOffsetY = 3;
+      rr(ctx, 16, ropeY-5, W-32, 10, 5); ctx.fillStyle = rg; ctx.fill();
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+      ctx.fillStyle = "#FFD36E";
+      ctx.beginPath(); ctx.arc(20, ropeY, 8, 0, 6.283); ctx.fill();
+      ctx.beginPath(); ctx.arc(W-20, ropeY, 8, 0, 6.283); ctx.fill();
+      ctx.fillStyle = "#7A5220";
+      ctx.beginPath(); ctx.arc(20, ropeY, 3, 0, 6.283); ctx.fill();
+      ctx.beginPath(); ctx.arc(W-20, ropeY, 3, 0, 6.283); ctx.fill();
+      ctx.restore();
+    }
+
+    /* hanger — rail par ek hook, niche triangle (asli hanger) */
+    ctx.save();
+    ctx.strokeStyle = "rgba(255,250,235,.85)"; ctx.lineWidth = 2; ctx.lineCap = "round";
+    clothes.forEach(function(c){
+      if (c.body.position.x < -maxSlot || c.body.position.x > W + maxSlot) return;   /* bahar wala dabba mat banao */
+      var fs = fitSize(c);
+      var top = worldPt(c.body, {x:0, y:-fs.h/2});
+      var a = worldPt(c.body, {x:-fs.w*0.34, y:-fs.h/2});
+      var b = worldPt(c.body, {x: fs.w*0.34, y:-fs.h/2});
+      var ax = c.sC ? c.sC.position.x : c.body.position.x;
+      ctx.beginPath();
+      ctx.moveTo(ax, ropeY + 1); ctx.lineTo(top.x, top.y);      /* hook ki gardan */
+      ctx.moveTo(top.x, top.y); ctx.lineTo(a.x, a.y);           /* triangle baayein */
+      ctx.moveTo(top.x, top.y); ctx.lineTo(b.x, b.y);           /* triangle daayein */
+      ctx.stroke();
+      ctx.strokeStyle = c.color; ctx.lineWidth = 2.6;
+      ctx.beginPath(); ctx.arc(ax, ropeY, 5.5, 0, 6.283); ctx.stroke();   /* hook ring */
+      ctx.strokeStyle = "rgba(255,250,235,.85)"; ctx.lineWidth = 2;
+    });
+    ctx.restore();
+
+    /* PRODUCTS ONLY — koi card, box, border ya price-band nahi.
+       Physics body sirf invisible hit/drag proxy hai; dikhega sirf
+       transparent product cutout, apne natural aspect me. */
+    for (var i = 0; i < clothes.length; i++){
+      var c = clothes[i], b = c.body;
+      if (b.position.x < -maxSlot || b.position.x > W + maxSlot) continue;
+      c.hover += (c.target - c.hover) * 0.10;
+      var s = 1 + c.hover * 0.06;
+      var f = fitSize(c);
+      ctx.save();
+      ctx.translate(b.position.x, b.position.y);
+      ctx.rotate(b.angle); ctx.scale(s,s);
+      if (c.img && c.img.complete && c.img.naturalWidth){
+        ctx.shadowColor = "rgba(30,10,40,.48)";
+        ctx.shadowBlur = 14 + c.hover * 18;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 8;
+        ctx.drawImage(c.img, -f.w/2, -f.h/2, f.w, f.h);
+        ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+      } else {
+        /* Loading me bhi box nahi — sirf chhota product symbol */
+        ctx.globalAlpha = .72;
+        ctx.font = Math.round(CW * .34) + "px sans-serif";
+        ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText("👕", 0, 0);
+        ctx.globalAlpha = 1;
+      }
+      ctx.restore();
+    }
+  }
+  function loop(){ draw(); requestAnimationFrame(loop); }
+
+  /* ---------- hover ---------- */
+  function pointerPos(e){
+    var r = canvas.getBoundingClientRect();
+    var t = (e.touches && e.touches[0]) || (e.changedTouches && e.changedTouches[0]) || e;
+    return { x: t.clientX - r.left, y: t.clientY - r.top };
+  }
+  function findCloth(pt){
+    var hit = Query.point(clothes.map(function(c){ return c.body; }), pt);
+    return hit.length ? clothes.find(function(c){ return c.body === hit[0]; }) : null;
+  }
+  function onMove(e){
+    var pt = pointerPos(e), c = findCloth(pt);
+    hoverPause = !!c;
+    clothes.forEach(function(x){ x.target = (x === c) ? 1 : 0; });
+    if (c){
+      var p = c.p;
+      tip.innerHTML = "<b>" + p.name + "</b>" +
+        '<span class="pr" style="color:' + c.color + '">₹' + p.price.toLocaleString("en-IN") + "</span>" +
+        (p.mrp > p.price ? '<span class="mrp">₹' + p.mrp.toLocaleString("en-IN") + "</span>" : "") +
+        '<div class="cta">👆 click karo — product khulega</div>';
+      tip.style.borderColor = c.color;
+      tip.classList.add("show");
+      tip.style.left = Math.max(100, Math.min(W-100, pt.x)) + "px";
+      tip.style.top  = Math.max(100, pt.y - 10) + "px";
+    } else tip.classList.remove("show");
+  }
+
+  /* ---------- click -> OPEN QUICK VIEW ---------- */
+  var down = null;
+  function onDown(e){ var pt = pointerPos(e); down = { x:pt.x, y:pt.y, t:Date.now() }; }
+  function onUp(e){
+    if (!down) return;
+    var pt = pointerPos(e);
+    var moved = Math.hypot(pt.x - down.x, pt.y - down.y);
+    var dt = Date.now() - down.t; down = null;
+    if (moved > 9 || dt > 600) return;               // drag tha
+    var c = findCloth(pt);
+    if (c){
+      Body.setVelocity(c.body, { x:c.body.velocity.x * 0.4, y:-1.2 });
+      openQV(c.p);
+    }
+  }
+
+  /* ================= QUICK VIEW + 360 ================= */
+  var qvP = null, selColour = null, selSize = null;
+  var vRot = 0, vTilt = 0, vVel = 0, vAuto = true, vDrag = false, lastX = 0, lastY = 0;
+  var qvViews = [], qvViewKey = "", qvCurrentSrc = "";
+  var vTarget = null;            /* smooth 360 snap ka target angle */
+  var qvRecolored = {};          /* view src -> selected colour ki recolored photo */
+  var recolorCache = {};         /* product|colour|src -> dataURL */
+  var qvFilterFallback = "";     /* recolor hone tak CSS filter (turant rang dikhe) */
+  var qvColourSeq = 0;           /* purani async recolor ignore karne ke liye */
+  var QV_SHADOW = "drop-shadow(0 22px 24px rgba(45,12,45,.32))";
+
+
+  /* ---------- COLOUR: kapde ka asal rang badlo (photo recolor) ----------
+     Sirf upar se tint nahi: har pixel ka hue/lightness target colour ki
+     taraf shift hota hai, kapde ki shading/folds waise ke waise rehte hain.
+     Black kapda maroon aur white kapda black bhi ban sakta hai. */
+  function clamp01(v){ return v < 0 ? 0 : (v > 1 ? 1 : v); }
+  function rgbToHsl(r, g, b){
+    r /= 255; g /= 255; b /= 255;
+    var mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn, h = 0;
+    if (d){
+      if (mx === r) h = ((g - b) / d) % 6;
+      else if (mx === g) h = (b - r) / d + 2;
+      else h = (r - g) / d + 4;
+      h *= 60; if (h < 0) h += 360;
+    }
+    var l = (mx + mn) / 2;
+    var s = d ? d / (1 - Math.abs(2 * l - 1)) : 0;
+    return [h, clamp01(s), l];
+  }
+  function hslToRgb(h, s, l){
+    h = ((h % 360) + 360) % 360;
+    var c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs(((h / 60) % 2) - 1)), m = l - c / 2;
+    var r = 0, g = 0, b = 0;
+    if (h < 60){ r = c; g = x; } else if (h < 120){ r = x; g = c; }
+    else if (h < 180){ g = c; b = x; } else if (h < 240){ g = x; b = c; }
+    else if (h < 300){ r = x; b = c; } else { r = c; b = x; }
+    return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)];
+  }
+  function hexToHsl(hex){
+    var m = /^#?([0-9a-f]{6})$/i.exec(String(hex || ""));
+    if (!m) return { h:0, s:0, l:0.5 };
+    var n = parseInt(m[1], 16);
+    var a = rgbToHsl((n >> 16) & 255, (n >> 8) & 255, n & 255);
+    return { h:a[0], s:a[1], l:a[2] };
+  }
+  /* ek pixel ko original colour (o) se target colour (t) ki taraf le jao.
+     p5/p95 = is photo ke kapde ki lightness range (shading bachane ke liye) */
+  function shiftPixel(r, g, b, o, t, p5, p95){
+    var a = rgbToHsl(r, g, b), h = a[0], s = a[1], L = a[2];
+    var lo = Math.max(0.015, t.l - 0.30), hi = Math.min(0.985, t.l + 0.32), rng = p95 - p5;
+    var l2 = rng > 0.05 ? lo + clamp01((L - p5) / rng) * (hi - lo)
+                        : clamp01(t.l + (L - o.l) * 0.92);
+    var h2, s2;
+    if (s > 0.10){ h2 = h + (t.h - o.h); s2 = clamp01(s * (t.s / Math.max(o.s, 0.30))); }
+    else { h2 = t.h; s2 = clamp01(t.s * (1 - Math.abs(l2 - 0.5) * 0.85)); }
+    return hslToRgb(h2, s2, l2);
+  }
+  function recolorSrc(src, origHex, targetHex, done){
+    var key = (qvP ? qvP.id : "") + "|" + targetHex + "|" + src;
+    if (recolorCache[key]){ done(recolorCache[key]); return; }
+    var im = new Image();
+    im.onload = function(){
+      try {
+        var w = im.naturalWidth || im.width, hh = im.naturalHeight || im.height;
+        if (!w || !hh){ done(null); return; }
+        var cv = document.createElement("canvas"); cv.width = w; cv.height = hh;
+        var cx = cv.getContext("2d"); cx.drawImage(im, 0, 0);
+        var id = cx.getImageData(0, 0, w, hh), d = id.data;
+        var o = hexToHsl(origHex), tc = hexToHsl(targetHex), samples = [], i, j;
+        for (i = 0; i < d.length; i += 16) if (d[i + 3] > 10) samples.push(rgbToHsl(d[i], d[i + 1], d[i + 2])[2]);
+        samples.sort(function(x, y){ return x - y; });
+        var p5 = samples.length ? samples[Math.floor(samples.length * 0.05)] : 0;
+        var p95 = samples.length ? samples[Math.min(samples.length - 1, Math.floor(samples.length * 0.95))] : 1;
+        for (j = 0; j < d.length; j += 4){
+          if (d[j + 3] === 0) continue;
+          var px = shiftPixel(d[j], d[j + 1], d[j + 2], o, tc, p5, p95);
+          d[j] = px[0]; d[j + 1] = px[1]; d[j + 2] = px[2];
+        }
+        cx.putImageData(id, 0, 0);
+        var url = cv.toDataURL("image/png");
+        recolorCache[key] = url; done(url);
+      } catch (err){ done(null); }
+    };
+    im.onerror = function(){ done(null); };
+    im.src = src;
+  }
+  /* canvas na chale (jaise file:// par taint) to CSS filter fallback */
+  function colourFilter(origHex, targetHex){
+    var o = hexToHsl(origHex), t = hexToHsl(targetHex);
+    if (o.s > 0.12 && o.l >= 0.12 && o.l <= 0.80){
+      var dh = Math.round(t.h - o.h);
+      var ss = Math.max(0.25, Math.min(2.2, t.s / Math.max(o.s, 0.30))).toFixed(2);
+      var bb = Math.max(0.55, Math.min(1.5, t.l / Math.max(o.l, 0.18))).toFixed(2);
+      return "hue-rotate(" + dh + "deg) saturate(" + ss + ") brightness(" + bb + ")";
+    }
+    var hr = Math.round(t.h - 38);
+    var sat = (1 + t.s * 3.2).toFixed(2);
+    var br = Math.max(0.5, Math.min(1.35, 0.35 + t.l * 1.45)).toFixed(2);
+    return "grayscale(1) sepia(0.9) saturate(" + sat + ") hue-rotate(" + hr + "deg) brightness(" + br + ") contrast(1.05)";
+  }
+  function paintCurrentFilter(){
+    var img = document.getElementById("qvfImg");
+    if (!img) return;
+    img.style.filter = (!qvRecolored[qvCurrentSrc] && qvFilterFallback) ? (QV_SHADOW + " " + qvFilterFallback) : "";
+  }
+  function applyColour(){
+    if (!qvP) return;
+    var cols = (qvP.colours && qvP.colours.length) ? qvP.colours : [{ n:"Default", h:"#CCCCCC" }];
+    var orig = cols[0];
+    var sel = cols.find(function(x){ return x.n === selColour; }) || orig;
+    var seq = ++qvColourSeq;
+    qvRecolored = {}; qvViewKey = "";
+    if (sel.h === orig.h){ qvFilterFallback = ""; paintCurrentFilter(); updateQVTransform(); return; }
+    qvFilterFallback = colourFilter(orig.h, sel.h);
+    paintCurrentFilter(); updateQVTransform();
+    var uniq = {}; qvViews.forEach(function(v){ uniq[v.src] = 1; });
+    Object.keys(uniq).forEach(function(src){
+      recolorSrc(src, orig.h, sel.h, function(url){
+        if (seq !== qvColourSeq || !url) return;
+        qvRecolored[src] = url; qvViewKey = "";
+        paintCurrentFilter(); updateQVTransform();
+      });
+    });
+  }
+
+  function buildViews(p){
+    var v = p.views || {};
+    var out = [{ label:"FRONT", src:v.front || frontCutout(p), angle:0, flip:false }];
+    if (v.side) out.push({ label:"SIDE", src:v.side, angle:90, flip:false });
+    if (v.back) out.push({ label:"BACK", src:v.back, angle:180, flip:false });
+    if (v.side) out.push({ label:"SIDE", src:v.side, angle:270, flip:true });
+    return out;
+  }
+  function setQVView(view){
+    if (!view) return;
+    qvCurrentSrc = view.src;
+    var disp = qvRecolored[view.src] || view.src;   /* selected colour wali photo agar ready hai */
+    var key = disp + "|" + (view.flip ? "flip" : "");
+    if (key === qvViewKey) return;
+    qvViewKey = key;
+    var img = document.getElementById("qvfImg");
+    if (img){
+      img.src = disp;
+      img.alt = (qvP ? qvP.name : "Product") + " — " + view.label.toLowerCase() + " view";
+      img.style.transform = view.flip ? "scaleX(-1)" : "";
+    }
+    paintCurrentFilter();
+  }
+  function signedAngleDelta(a, b){
+    return ((a - b + 540) % 360) - 180;
+  }
+  function updateQVTransform(){
+    var o = document.getElementById("obj");
+    if (!o) return;
+    var displayRot = vRot, lab = document.getElementById("qvAngle");
+    var norm = ((vRot % 360) + 360) % 360;
+    if (qvViews.length > 1){
+      var best = qvViews[0], bestDelta = signedAngleDelta(norm, best.angle);
+      qvViews.forEach(function(view){
+        var d = signedAngleDelta(norm, view.angle);
+        if (Math.abs(d) < Math.abs(bestDelta)){ best = view; bestDelta = d; }
+      });
+      setQVView(best);
+      /* photo kinare tak ghumegi (78deg), phir agli photo khulti hai — pura 360 feel */
+      displayRot = Math.max(-78, Math.min(78, bestDelta * 1.65));
+      if (lab){ var txt = best.label + " VIEW · " + Math.round(norm) + "°";
+        if (lab.textContent !== txt) lab.textContent = txt; }
+    } else if (qvViews.length === 1){
+      setQVView(qvViews[0]);   /* selected colour wali photo yahi se <img> par lagegi */
+      if (lab && qvP){
+        var txt2 = "360° VIEW · " + Math.round(norm) + "°";
+        if (lab.textContent !== txt2) lab.textContent = txt2;
+      }
+    }
+    o.style.transform = "rotateY(" + displayRot.toFixed(2) + "deg) rotateX(" + vTilt.toFixed(2) + "deg)";
+  }
+
+  function openQV(p){
+    qvP = p;
+    selColour = (p.colours && p.colours[0] && p.colours[0].n) || "Default";
+    selSize = firstAvailable(p);
+    vRot = 0; vTilt = 0; vVel = 0;
+    vAuto = true; vTarget = null; qvRecolored = {}; qvFilterFallback = ""; qvColourSeq++;
+    var sb0 = document.getElementById("spinBtn"); if (sb0) sb0.classList.add("on");
+
+    document.getElementById("qvCat").textContent = (p.gender||"") + " · " + (p.category||"");
+    document.getElementById("qvCat").style.color = catColor(p);
+    document.getElementById("qvName").textContent = p.name;
+    document.getElementById("qvPrice").textContent = "₹" + p.price.toLocaleString("en-IN");
+    document.getElementById("qvMrp").textContent = p.mrp > p.price ? "₹" + p.mrp.toLocaleString("en-IN") : "";
+    var off = p.mrp > p.price ? Math.round((1 - p.price/p.mrp)*100) : 0;
+    document.getElementById("qvOff").textContent = off ? off + "% OFF" : "";
+    document.getElementById("qvOff").style.display = off ? "inline-block" : "none";
+    document.getElementById("qvDet").href = "product.html?id=" + p.id;
+
+    /* Product-only photo views: Front -> Side -> Back -> Side */
+    qvViews = buildViews(p); qvViewKey = "";
+    qvViews.forEach(function(view){ var pre = new Image(); pre.src = view.src; });
+    var fimg = document.getElementById("qvfImg");
+    fimg.onerror = function(){ fimg.onerror = null; fimg.src = webpOf(p.img); };
+    setQVView(qvViews[0]);
+    updateQVTransform();
+
+    var info = document.getElementById("qvInfo");
+    if (info) info.innerHTML = "<b>Fabric:</b> " + (p.fabric || "Premium fabric") +
+      (p.care ? "<br>" + p.care : "");
+
+    paintSwatches(); paintSizes(); paintMeta();
+    document.getElementById("qv").classList.add("on");
+    if (window.gsap){
+      gsap.fromTo(".qv-card", { scale:.92, y:26, opacity:0 }, { scale:1, y:0, opacity:1, duration:.42, ease:"back.out(1.6)" });
+    }
+  }
+  function closeQV(){
+    document.getElementById("qv").classList.remove("on");
+    qvP = null;
+  }
+  window.closeQV = closeQV;
+  window.snapSpin = function(deg){
+    vAuto = false; vVel = 0; vDrag = false; vTilt = 0;
+    var sb = document.getElementById("spinBtn"); if (sb) sb.classList.remove("on");
+    var norm = ((vRot % 360) + 360) % 360;
+    vTarget = vRot + signedAngleDelta(deg, norm);   /* ghoomte hue us view par jao */
+    updateQVTransform();
+  };
+  window.qvRotate = function(dir){
+    vAuto = false; vVel = 0; vDrag = false;
+    var sb = document.getElementById("spinBtn"); if (sb) sb.classList.remove("on");
+    var base = (vTarget != null ? vTarget : vRot);
+    var snapped = Math.round(base / 90) * 90;
+    if (Math.abs(base - snapped) < 0.6) base = snapped;  /* 89.999° ko 90° hi mano */
+    vTarget = dir > 0 ? (Math.floor(base / 90) + 1) * 90 : (Math.ceil(base / 90) - 1) * 90;
+    updateQVTransform();
+  };
+
+  function firstAvailable(p){
+    var s = p.sizes || [];
+    for (var i = 0; i < s.length; i++) if ((p.stock||{})[s[i]] !== 0) return s[i];
+    return s[0] || null;
+  }
+  function paintSwatches(){
+    var box = document.getElementById("qvSw");
+    var cols = (qvP.colours && qvP.colours.length) ? qvP.colours : [{n:"Default", h:"#CCCCCC"}];
+    box.innerHTML = cols.map(function(c){
+      return '<div class="sw' + (c.n === selColour ? " on" : "") + '" title="' + c.n + '"' +
+             ' style="background:' + c.h + '" data-col="' + c.n + '"></div>';
+    }).join("");
+    box.querySelectorAll(".sw").forEach(function(el){
+      el.addEventListener("click", function(){
+        selColour = el.getAttribute("data-col");
+        document.getElementById("qvColourName").textContent = selColour;
+        paintSwatches(); paintMeta();   /* paintSwatches ke andar applyColour() rang badlega */
+      });
+    });
+    document.getElementById("qvColourName").textContent = selColour;
+    applyColour();   /* kapde ka rang asal me badlo */
+  }
+  function paintSizes(){
+    var box = document.getElementById("qvSz");
+    var sizes = qvP.sizes || [];
+    box.innerHTML = sizes.map(function(s){
+      var out = (qvP.stock||{})[s] === 0;
+      return '<div class="sz' + (s === selSize ? " on" : "") + (out ? " out" : "") + '" data-sz="' + s + '">' + s + "</div>";
+    }).join("") || '<span class="muted">Free size</span>';
+    box.querySelectorAll(".sz").forEach(function(el){
+      el.addEventListener("click", function(){
+        if (el.classList.contains("out")) return;
+        selSize = el.getAttribute("data-sz"); paintSizes(); paintMeta();
+      });
+    });
+  }
+  function paintMeta(){
+    var el = document.getElementById("qvMeta");
+    var st = (qvP.stock||{})[selSize];
+    var stockTxt = (st === undefined) ? "" : (st === 0 ? "Out of stock" : (st <= 3 ? "Sirf " + st + " bache hain" : st + " available"));
+    var viewTxt = qvViews.length >= 4 ? "🧭 Front · Side · Back 3D photo views ready<br>" :
+                  (qvViews.length === 2 ? "🧭 Front · Back photo views ready<br>" : "");
+    el.innerHTML = viewTxt + (qvP.model ? "📏 " + qvP.model + "<br>" : "") +
+      (stockTxt ? "📦 " + stockTxt + "<br>" : "") +
+      "🚚 Free shipping above ₹999 · COD available";
+  }
+
+  /* ---------- 3D spin ---------- */
+  function spinLoop(){
+    if (!vDrag && vTarget != null){
+      var diff = vTarget - vRot;
+      vRot += diff * 0.16;
+      if (Math.abs(diff) < 0.35){ vRot = vTarget; vTarget = null; }
+    }
+    else if (vAuto && !vDrag) vRot += 0.55;
+    else if (!vDrag){ vRot += vVel; vVel *= 0.94; }
+    updateQVTransform();
+    requestAnimationFrame(spinLoop);
+  }
+  function bindSpin(){
+    var stage = document.getElementById("stage");
+    if (!stage) return;
+    stage.addEventListener("dragstart", function(e){ e.preventDefault(); });
+    stage.addEventListener("pointerdown", function(e){
+      e.preventDefault();
+      vDrag = true; vTarget = null; lastX = e.clientX; lastY = e.clientY; vVel = 0;
+      try { stage.setPointerCapture(e.pointerId); } catch(err){}
+    });
+    stage.addEventListener("pointermove", function(e){
+      if (!vDrag) return;
+      var dx = e.clientX - lastX, dy = e.clientY - lastY;
+      lastX = e.clientX; lastY = e.clientY;
+      vRot += dx * 0.85; vVel = dx * 0.45;
+      vTilt = Math.max(-20, Math.min(20, vTilt - dy * 0.25));
+      updateQVTransform();
+    });
+    function endDrag(){ vDrag = false; }
+    stage.addEventListener("pointerup", endDrag);
+    stage.addEventListener("pointercancel", endDrag);
+    stage.addEventListener("pointerleave", endDrag);
+    document.getElementById("spinBtn").addEventListener("click", function(){
+      vAuto = !vAuto; this.classList.toggle("on", vAuto);
+    });
+  }
+
+  document.getElementById("qvAdd").addEventListener("click", function(){
+    if (!qvP) return;
+    if (typeof addToCart === "function") addToCart(qvP.id, selSize, selColour, 1);
+    showToast("🛒 " + qvP.name + " (" + selColour + ", " + selSize + ") cart me");
+    if (window.gsap) gsap.fromTo("#cartcount", { scale:1.9 }, { scale:1, duration:.55, ease:"back.out(3)" });
+    closeQV();
+  });
+  document.getElementById("qv").addEventListener("click", function(e){ if (e.target === this) closeQV(); });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeQV(); });
+
+  var toastTimer;
+  function showToast(msg){
+    var t = document.getElementById("ctoast");
+    t.textContent = msg;
+    if (window.gsap){
+      gsap.killTweensOf(t);
+      gsap.fromTo(t, { opacity:0, y:16 }, { opacity:1, y:0, duration:.32, ease:"power3.out" });
+      gsap.to(t, { opacity:0, y:16, duration:.3, delay:2.2 });
+    } else {
+      t.style.opacity = 1; clearTimeout(toastTimer);
+      toastTimer = setTimeout(function(){ t.style.opacity = 0; }, 2400);
+    }
+  }
+
+  /* ---------- resize ---------- */
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W * DPR; canvas.height = H * DPR;
+    canvas.style.width = W + "px"; canvas.style.height = H + "px";
+    if (ctx) ctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  var rzT;
+  window.addEventListener("resize", function(){ clearTimeout(rzT); rzT = setTimeout(function(){ resize(); build(); }, 220); });
+  window.addEventListener("orientationchange", function(){ setTimeout(function(){ resize(); build(); }, 350); });
+
+  function bind(id, fn){ var el = document.getElementById(id); if (el) el.addEventListener("click", fn); }
+  bind("windBtn", function(){ windOn = !windOn; this.classList.toggle("on", windOn); showToast(windOn ? "🌬️ Hawa chalu" : "🌬️ Hawa band"); });
+  bind("resetBtn", function(){ build(); showToast("↺ Rail set ho gayi"); });
+  bind("trainBtn", function(){ trainOn = !trainOn; syncTrainBtn(); showToast(trainOn ? "🚆 Line chalu — kapde chal rahe hain" : "⏸️ Line ruk gayi"); });
+  bind("shakeBtn", function(){
+    clothes.forEach(function(c){
+      Body.setVelocity(c.body, { x:(Math.random()-0.5)*5, y:-1.5 - Math.random()*2 });
+      Body.setAngularVelocity(c.body, (Math.random()-0.5)*0.12);
+    });
+    showToast("🤝 Hil diya!");
+  });
+
+  canvas.addEventListener("mousemove", onMove);
+  canvas.addEventListener("touchstart", onDown, { passive:true });
+  canvas.addEventListener("touchend", onUp);
+  canvas.addEventListener("pointerdown", onDown);
+  canvas.addEventListener("pointerup", onUp);
+  canvas.addEventListener("pointermove", onMove);
+  canvas.addEventListener("pointerleave", function(){ hoverPause = false; clothes.forEach(function(x){ x.target = 0; }); tip.classList.remove("show"); });
+  document.addEventListener("touchmove", function(e){ e.preventDefault(); }, { passive:false });
+
+  /* ---------- boot ---------- */
+  function start(){
+    var src = loadProducts();
+    var bnEl = document.getElementById("brandName");
+    if (bnEl){ var bn = (typeof CONFIG !== "undefined" && CONFIG.name) || "VastraWave";
+      bnEl.innerHTML = bn.replace(/wave/i, '<span class="wave">Wave</span>'); }
+    if (!window.Matter || !ctx || !src.length){ fallback(src); return; }
+    resize(); build(); loop(); bindSpin(); spinLoop();
+    if (typeof paintCount === "function") paintCount();
+    if (window.gsap){
+      gsap.timeline()
+        .from(".site-header", { y:-30, opacity:0, duration:.7, ease:"power3.out" })
+        .from(".announcebar", { y: 24, opacity:0, duration:.6, ease:"power3.out" }, "-=0.45")
+        .from(".poster", { y: 40, opacity:0, duration:.6, ease:"power3.out" }, "-=0.4");
+    }
+  }
+  function fallback(src){
+    document.getElementById("fallback").classList.add("on");
+    document.getElementById("fbgrid").innerHTML = src.map(function(p){
+      return '<a href="product.html?id=' + p.id + '"><img src="' + webpOf(p.img) +
+             '" onerror="this.src=\'' + p.img + '\'" alt=""><div style="margin-top:6px;font-size:13px">' +
+             p.name + '</div><b style="color:#7A1F2B">₹' + p.price.toLocaleString("en-IN") + "</b></a>";
+    }).join("");
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+  else start();
+})();
+</script>
+</body>
+</html>

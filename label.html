@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Print Shipping Label — VastraWave</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%237A1F2B'/><text x='50' y='70' font-size='60' font-family='serif' fill='%23C9A227' text-anchor='middle'>V</text></svg>">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/style-vivid.css">
+<link rel="stylesheet" href="assets/css/label.css">
+  <script src="assets/js/admin-lock.js"></script>
+</head>
+<body class="size-46 lockable">
+<!-- ===== ADMIN LOCK — password ke bina kuch nahi dikhega ===== -->
+<div id="gate" class="adminlock">
+  <div class="gatebox">
+    <div class="ico">🔒</div>
+    <h2>Shipping Labels</h2>
+    <p>Sirf authorized log ke liye.<br>Password daal kar andar aayein.</p>
+    <input type="password" id="pw" placeholder="Password" autocomplete="current-password">
+    <button type="button" onclick="adminTryUnlock()">Unlock</button>
+    <div class="hint2" id="gatehint"></div>
+  </div>
+</div>
+<script>
+(function(){
+  if (window.adminLockBoot) adminLockBoot();
+  var p = document.getElementById("pw");
+  if (p) p.addEventListener("keydown", function(e){ if (e.key === "Enter") adminTryUnlock(); });
+})();
+</script>
+
+
+<!-- SCREEN ONLY -->
+<div class="no-print lb-bar">
+  <div class="wrap lb-bar-in">
+    <div>
+      <b>Shipping labels</b> <span class="muted tiny" id="howmany"></span>
+    </div>
+    <div class="row" style="gap:8px; flex-wrap:wrap">
+      <select class="sel" id="size" onchange="setSize(this.value)">
+        <option value="46">Label size: 4 × 6 inch (thermal)</option>
+        <option value="a4">Label size: A4 (2 per page)</option>
+      </select>
+      <button class="btn sm ghost" onclick="saveAll()">💾 Save details</button>
+      <button class="btn sm" onclick="window.print()">🖨️ Print labels</button>
+      <a href="admin.html" class="btn sm ghost">← Admin</a>
+    </div>
+  </div>
+</div>
+
+<!-- LABEL SHEET -->
+<div id="sheet" class="lb-sheet"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/products-live-data.js"></script>
+<script src="assets/js/products-live.js"></script>
+<script src="assets/js/app.js"></script>
+<script src="assets/js/barcode.js"></script>
+<script src="assets/js/label.js"></script>
+</body>
+</html>

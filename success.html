@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Order Confirmed — VastraWave</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%237A1F2B'/><text x='50' y='70' font-size='60' font-family='serif' fill='%23C9A227' text-anchor='middle'>V</text></svg>">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/style-vivid.css">
+</head>
+<body>
+
+<header id="site-header" class="top"></header>
+
+<main class="wrap" style="max-width:640px">
+  <div class="success" style="margin-top:16px">
+    <div class="tick">✓</div>
+    <h1 style="font-size:22px">Order confirmed!</h1>
+    <p class="muted" id="sub">Thank you — aapka order place ho gaya hai.</p>
+    <div id="orderbox"></div>
+  </div>
+
+  <div class="form" style="margin-top:14px">
+    <h3 style="font-size:15px; margin-bottom:10px">Order tracking</h3>
+    <div class="timeline">
+      <div class="tl done"><div><div class="ts">Order placed</div><div class="td" id="t1">Just now</div></div></div>
+      <div class="tl"><div><div class="ts">Packed &amp; quality checked</div><div class="td">Within 24 hours</div></div></div>
+      <div class="tl"><div><div class="ts">Shipped</div><div class="td">1–2 working days</div></div></div>
+      <div class="tl"><div><div class="ts">Out for delivery</div><div class="td">3–6 working days</div></div></div>
+      <div class="tl"><div><div class="ts">Delivered</div><div class="td">Aapke address par</div></div></div>
+    </div>
+  </div>
+
+  <div class="center" style="margin:18px 0">
+    <button class="btn wa" onclick="shareOrder()" style="max-width:340px;margin:0 auto">🅦 Order details WhatsApp par bhejein</button>
+    <div class="row" style="justify-content:center;margin-top:12px">
+      <a href="shop.html" class="btn ghost sm">Continue shopping</a>
+      <a href="clothesline.html" class="btn ghost sm">Back to home</a>
+    </div>
+  </div>
+</main>
+
+<footer id="site-footer"></footer>
+<nav id="bottomnav" class="bottomnav"></nav>
+<div id="fab"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/products-live-data.js"></script>
+<script src="assets/js/products-live.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+let O = null;
+function shareOrder(){
+  if(!O) return;
+  const msg = `Hi ${CONFIG.name}! Order ${O.id} confirm hua.\n\n${O.items.join("\n")}\n\nTotal: ${money(O.total)} (${O.pay})\nDelivery address: ${O.address}\n\nPlease update me on dispatch.`;
+  location.href = waUrl(msg);
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+  injectChrome("index.html");
+  const id = qs.get("order");
+  O = getOrders().find(o => o.id === id);
+  if(!O){
+    document.getElementById("orderbox").innerHTML =
+      `<p class="muted">Order details nahi mile. <a href="shop.html" style="color:var(--brand)">Shop karein</a>.</p>`;
+    return;
+  }
+  document.getElementById("sub").innerHTML =
+    `Order ID <b>${O.id}</b> · ${O.date}<br>Confirmation ${O.name} (${O.phone}) par bhej di gayi hai.`;
+  document.getElementById("t1").textContent = O.date;
+  document.getElementById("orderbox").innerHTML = `
+    <div style="text-align:left; background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:14px; margin-top:14px">
+      <div class="l" style="display:flex;justify-content:space-between;font-size:13.5px;padding:3px 0"><span class="muted">Payment</span><b>${O.pay} ${O.pay==="COD"?'<span class="pill cod">COD</span>':'<span class="pill paid">Paid</span>'}</b></div>
+      ${O.items.map(i=>`<div style="font-size:13.5px;padding:3px 0">• ${esc(i)}</div>`).join("")}
+      <hr style="border:none;border-top:1px dashed var(--line);margin:10px 0">
+      <div style="display:flex;justify-content:space-between;font-size:13.5px"><span>Subtotal</span><span>${money(O.subtotal)}</span></div>
+      ${O.discount?`<div style="display:flex;justify-content:space-between;font-size:13.5px;color:var(--ok)"><span>Discount</span><span>− ${money(O.discount)}</span></div>`:""}
+      <div style="display:flex;justify-content:space-between;font-size:13.5px"><span>Shipping</span><span>${O.shipping?money(O.shipping):"FREE"}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:17px;font-weight:800;margin-top:6px"><span>Total</span><span>${money(O.total)}</span></div>
+      <div class="tiny muted" style="margin-top:10px">Delivering to: ${esc(O.address)}</div>
+    </div>`;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About, Shipping, Returns &amp; Size Guide — VastraWave</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%237A1F2B'/><text x='50' y='70' font-size='60' font-family='serif' fill='%23C9A227' text-anchor='middle'>V</text></svg>">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/style-vivid.css">
+</head>
+<body>
+
+<header id="site-header" class="top"></header>
+
+<main class="wrap" style="max-width:820px">
+  <div class="crumb"><a href="clothesline.html">Home</a> / Info</div>
+
+  <h1 style="font-size:22px; margin:6px 0 8px">Our story</h1>
+  <p class="muted">VastraWave Surat — India ke textile hub — se curated ethnic wear laata hai. Har piece quality check ke baad dispatch hota hai, isliye aapko milta hai showroom jaisa finish, boutique ke bajay me nahi.</p>
+
+  <div class="acc" id="acc">
+    <details id="shipping" open>
+      <summary>Shipping policy <span>+</span></summary>
+      <div class="acc-body">
+        • Dispatch within 24 hours (working days).<br>
+        • Delivery in 3–6 working days, pincode ke hisaab se. Metro cities me 2–4 din.<br>
+        • Orders above ₹999 par shipping free; usse kam par ₹60 shipping charge.<br>
+        • Tracking link SMS + WhatsApp par bheja jata hai.<br>
+        • Shipping PAN India available hai.
+      </div>
+    </details>
+    <details id="returns">
+      <summary>Return / exchange policy <span>+</span></summary>
+      <div class="acc-body">
+        • <b>7-day easy size exchange</b> — product unused, unwashed aur tags ke saath ho to.<br>
+        • Sizing issue par exchange free hai; hum reverse pickup arrange karenge.<br>
+        • Damaged / wrong item milne par unboxing video ke saath 48 hours me report karein — full refund ya replacement.<br>
+        • Refund 5–7 working days me original payment method par aa jata hai (COD par bank transfer).<br>
+        • Custom-stitched ya sale items par exchange applicable nahi.
+      </div>
+    </details>
+    <details id="size">
+      <summary>Size guide <span>+</span></summary>
+      <div class="acc-body">
+        Har product page par us category ka size chart diya gaya hai. Neeche general reference:
+        <div id="chartbox"></div>
+        <p class="tiny muted">Note: Ye garment measurements hain (body measurements nahi). Do size ke beech me ho to ek size upar lein.</p>
+      </div>
+    </details>
+    <details>
+      <summary>Payment options <span>+</span></summary>
+      <div class="acc-body">
+        • UPI (GPay, PhonePe, Paytm, BHIM)<br>
+        • Credit &amp; Debit cards, Netbanking (50+ banks), Wallets<br>
+        • EMI options on cards above ₹3,000<br>
+        • <b>Cash on Delivery</b> — most pincodes par available<br>
+        • Sabhi payments Razorpay (PCI-DSS compliant) se hote hain; hum card details store nahi karte.
+      </div>
+    </details>
+    <details id="privacy">
+      <summary>Privacy policy <span>+</span></summary>
+      <div class="acc-body">
+        Aapka data sirf order process karne, delivery aur customer support ke liye use hota hai. Hum aapka number kisi third party ko bechte nahi.
+        Marketing messages aap opt-out kar sakte hain. DPDP Act 2023 ke anusar aap apni information delete karne ka request kar sakte hain.
+      </div>
+    </details>
+    <details id="terms">
+      <summary>Terms &amp; conditions <span>+</span></summary>
+      <div class="acc-body">
+        • Product colour screen settings ke karan thoda alag dikhai de sakta hai.<br>
+        • Handloom/handwork products me minor irregularities natural hain, ye defect nahi mana jata.<br>
+        • COD orders do baar cancel hone par COD band kiya ja sakta hai.<br>
+        • Disputes Surat, Gujarat jurisdiction me honge.
+      </div>
+    </details>
+    <details id="contact">
+      <summary>Contact us <span>+</span></summary>
+      <div class="acc-body">
+        📞 <a href="tel:+919876543210" style="color:var(--brand)">+91 98765 43210</a> (10 am – 7 pm, Mon–Sat)<br>
+        ✉️ hello@vastrawave.store<br>
+        📍 Bardoli, Surat, Gujarat 394601<br>
+        💬 Sabse fast reply WhatsApp par milta hai.
+      </div>
+    </details>
+  </div>
+</main>
+
+<footer id="site-footer"></footer>
+<nav id="bottomnav" class="bottomnav"></nav>
+<div id="fab"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/products-live-data.js"></script>
+<script src="assets/js/products-live.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+  injectChrome("about.html");
+  document.getElementById("chartbox").innerHTML = Object.keys(SIZE_CHART).map(cat=>{
+    const c = SIZE_CHART[cat];
+    return `<h4 style="margin:12px 0 6px;font-size:13px">${cat}</h4>
+      <table class="chart"><tr><th>Size</th><th>Measurements (inches)</th></tr>
+      ${Object.keys(c).map(s=>`<tr><td><b>${s}</b></td><td>${c[s]}</td></tr>`).join("")}</table>`;
+  }).join("");
+});
+</script>
+</body>
+</html>
