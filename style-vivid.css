@@ -1,0 +1,106 @@
+/* ============================================================
+   STYLE VIVID — colourful layer
+   style.css ke BAAD load hota hai, isliye sirf upar se rang
+   badalta hai, kuch todta nahi. Hatana ho to bas ye <link> hata do.
+   ============================================================ */
+
+:root{
+  --vv-1:#7A1F2B;   /* brand wine      */
+  --vv-2:#E0245E;   /* hot pink        */
+  --vv-3:#FB8C00;   /* marigold        */
+  --vv-4:#B14AED;   /* orchid          */
+  --vv-5:#1E88E5;   /* azure           */
+  --vv-6:#00897B;   /* teal            */
+  --vv-gold:#C9A227;
+  --vv-grad:linear-gradient(100deg,#7A1F2B,#E0245E 45%,#FB8C00);
+  --vv-grad2:linear-gradient(100deg,#B14AED,#1E88E5 55%,#00897B);
+  --vv-shadow:0 10px 30px rgba(122,31,43,.16);
+  --vv-shadow-lg:0 18px 48px rgba(20,10,30,.22);
+}
+
+/* ---------- buttons ---------- */
+.btn{transition:transform .18s ease, box-shadow .18s ease, filter .18s ease}
+.btn:hover{transform:translateY(-2px); box-shadow:var(--vv-shadow)}
+.btn.gold,.btn.primary{
+  background:var(--vv-grad);
+  background-size:160% 160%;
+  border:0; color:#fff; font-weight:800; letter-spacing:.02em;
+  box-shadow:0 8px 22px rgba(224,36,94,.32);
+  animation:vvShift 7s ease infinite;
+}
+.btn.gold:hover{filter:brightness(1.08)}
+@keyframes vvShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+
+/* ---------- section headings: gradient underline ---------- */
+.sec-head h2{
+  position:relative; padding-bottom:8px; font-weight:800; letter-spacing:-.01em;
+}
+.sec-head h2::after{
+  content:""; position:absolute; left:0; bottom:0; height:4px; width:56px; border-radius:99px;
+  background:var(--vv-grad);
+}
+.sec-head a{color:var(--vv-2); font-weight:700}
+
+/* ---------- hero ---------- */
+.hero{border-radius:18px; overflow:hidden; box-shadow:var(--vv-shadow-lg)}
+.hero .ov{background:linear-gradient(100deg,rgba(20,6,18,.62),rgba(122,31,43,.30) 55%,rgba(251,140,0,.18))}
+.hero .kicker{
+  background:var(--vv-grad); -webkit-background-clip:text; background-clip:text; color:transparent;
+  font-weight:900; letter-spacing:.16em;
+}
+.hero h1{text-shadow:0 4px 22px rgba(0,0,0,.35)}
+.trust{
+  background:linear-gradient(100deg,#FFF6E9,#FFEAF2 50%,#EAF3FF);
+  border:1px solid rgba(224,36,94,.16); border-radius:14px;
+}
+.trust .t-ico{filter:saturate(1.25)}
+
+/* ---------- product cards ---------- */
+.grid .card,.p-card,.prodcard{
+  border-radius:16px !important;
+  transition:transform .2s ease, box-shadow .2s ease;
+}
+.grid .card:hover{transform:translateY(-4px); box-shadow:var(--vv-shadow-lg)}
+.badge,.pbadge{
+  background:var(--vv-grad) !important; color:#fff !important;
+  font-weight:800; letter-spacing:.02em; border-radius:99px !important;
+}
+
+/* ---------- price & discount ---------- */
+.price{color:var(--vv-1); font-weight:800}
+.mrp{color:#9AA1AA}
+.off,.offpct{color:var(--vv-6); font-weight:800}
+
+/* ---------- chips / swatches / filters ---------- */
+.chip,.fchip,.pill,.tag{
+  border-radius:99px !important; transition:transform .15s ease, background .15s ease;
+}
+.chip:hover,.fchip:hover{transform:translateY(-1px)}
+.chip.on,.fchip.on{background:var(--vv-grad); color:#fff; border-color:transparent}
+
+/* ---------- announcement bar ---------- */
+.announce{
+  background:var(--vv-grad) !important;
+  background-size:200% 200% !important;
+  animation:vvShift 9s ease infinite;
+  color:#fff; font-weight:600;
+}
+
+/* ---------- top nav / bottom nav ---------- */
+.top{border-bottom:1px solid rgba(224,36,94,.14)}
+.logo .mark{background:var(--vv-grad); color:#fff}
+.bottomnav{
+  background:rgba(255,255,255,.94) !important;
+  border-top:1px solid rgba(122,31,43,.12);
+  box-shadow:0 -6px 22px rgba(20,10,30,.10);
+}
+.bottomnav a.active{color:var(--vv-2)}
+.bottomnav a.active .b-ico{filter:drop-shadow(0 3px 6px rgba(224,36,94,.35))}
+
+/* ---------- misc polish ---------- */
+.wrap section{border-radius:14px}
+footer#site-footer{background:linear-gradient(160deg,#1B0E14,#2A1220 60%,#12141C)}
+footer#site-footer h4{color:var(--vv-gold)}
+#toast{background:var(--vv-grad) !important; color:#fff; font-weight:700; border-radius:99px; box-shadow:var(--vv-shadow-lg)}
+.modal .mhead{background:var(--vv-grad); color:#fff}
+.modal{border-radius:16px !important; overflow:hidden; box-shadow:var(--vv-shadow-lg)}

@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Product Manager — Add / Update / Delete</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%237A1F2B'/><text x='50' y='70' font-size='60' font-family='serif' fill='%23C9A227' text-anchor='middle'>V</text></svg>">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#F4F5F7;color:#1A1A1A;font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+  a{color:#7A1F2B}
+  button,input,select,textarea{font:inherit}
+  .top{background:#1F2937;color:#fff;padding:10px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:60}
+  .top h1{font-size:16px;margin:0;flex:1}
+  .top a{color:#cbd5e1;text-decoration:none;font-size:12px}
+  .wrap{max-width:1240px;margin:0 auto;padding:14px}
+  .card{background:#fff;border:1px solid #E3E6EA;border-radius:10px;padding:14px;margin-bottom:14px}
+  .btn{border:1px solid #C9CED6;background:#fff;border-radius:8px;padding:7px 12px;cursor:pointer;font-size:13px;font-weight:600}
+  .btn:hover{background:#F3F4F6}
+  .btn.pri{background:#7A1F2B;border-color:#7A1F2B;color:#fff}
+  .btn.pri:hover{background:#631822}
+  .btn.gd{background:#0F7A45;border-color:#0F7A45;color:#fff}
+  .btn.gd:hover{background:#0C6237}
+  .btn.dgr{color:#B3261E;border-color:#E3B7B2}
+  .btn.sm{padding:4px 9px;font-size:12px}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+  .stat{background:#fff;border:1px solid #E3E6EA;border-radius:10px;padding:10px 12px}
+  .stat b{display:block;font-size:21px;line-height:1.2}
+  .stat span{font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:.04em}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+  .toolbar input,.toolbar select{border:1px solid #C9CED6;border-radius:8px;padding:7px 10px}
+  .toolbar .grow{flex:1;min-width:180px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{border-bottom:1px solid #ECEFF2;padding:8px 6px;text-align:left;vertical-align:middle}
+  th{background:#F8F9FB;font-size:11px;text-transform:uppercase;color:#6B7280;letter-spacing:.03em;white-space:nowrap}
+  html{scroll-padding-top:70px}
+  /* ---- product list: table side-scroll karega, cards mobile par stack honge ---- */
+  .tscroll{overflow:auto;-webkit-overflow-scrolling:touch;border:1px solid #ECEFF2;border-radius:8px;
+          max-height:60vh;min-height:260px;background:#fff}
+  .tscroll table{min-width:1040px;border-collapse:separate;border-spacing:0}
+  .tscroll th{position:sticky;top:0;z-index:3;box-shadow:0 1px 0 #D5D9DF}
+  .pcards{display:none;overflow:auto;-webkit-overflow-scrolling:touch;
+          max-height:60vh;min-height:260px;border:1px solid #ECEFF2;border-radius:8px;
+          padding:8px;background:#FAFBFC}
+  .pcard{border:1px solid #E3E6EA;border-radius:10px;padding:10px;margin-bottom:10px;background:#fff}
+  .pcard h4{margin:0 0 3px;font-size:14px;line-height:1.3}
+  .pcard .meta{font-size:11px;color:#6B7280;margin-bottom:5px}
+  .pcard .srow{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 2px;align-items:center}
+  .pcard .srow span{font-size:11px;color:#6B7280;display:flex;align-items:center;gap:3px}
+  .pcard .srow input{width:52px;border:1px solid #D5D9DF;border-radius:6px;padding:3px 4px;font-size:12px;text-align:center}
+  .pcard .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .scrollhint{display:none;font-size:11px;color:#6B7280;margin:7px 0 0}
+  @media(max-width:1040px){.scrollhint{display:block}}
+  tr.inactive td{opacity:.5}
+  .thumb{width:44px;height:56px;object-fit:cover;border-radius:6px;border:1px solid #E3E6EA;background:#F3F4F6}
+  .pill{display:inline-block;padding:2px 7px;border-radius:99px;font-size:11px;font-weight:700}
+  .pill.g{background:#E6F4EC;color:#0F7A45}
+  .pill.r{background:#FDECEA;color:#B3261E}
+  .pill.y{background:#FFF4E5;color:#8A5300}
+  .pill.b{background:#EAF0FB;color:#1F3864}
+  .stockbox{display:flex;gap:4px;flex-wrap:wrap}
+  .stockbox input{width:56px;border:1px solid #D5D9DF;border-radius:6px;padding:3px 4px;font-size:12px;text-align:center}
+  .stockbox small{font-size:10px;color:#6B7280;align-self:center;width:26px}
+  .modal{position:fixed;inset:0;background:rgba(17,20,24,.6);display:none;overflow:auto;z-index:100;padding:18px}
+  .modal.on{display:block}
+  .sheet{background:#fff;max-width:880px;margin:0 auto;border-radius:12px;padding:18px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .f label{display:block;font-size:11px;font-weight:700;color:#4B5563;text-transform:uppercase;margin-bottom:4px;letter-spacing:.03em}
+  .f input,.f select,.f textarea{width:100%;border:1px solid #C9CED6;border-radius:8px;padding:8px 10px}
+  .f textarea{min-height:70px;resize:vertical}
+  .hint{font-size:11px;color:#6B7280;margin-top:3px}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 18px;border-radius:8px;display:none;z-index:200;font-size:13px;max-width:90vw}
+  .banner{border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:12px;border:1px solid}
+  .banner.warn{background:#FFF8E6;border-color:#F0D89A;color:#6B4E00}
+  .banner.info{background:#EAF0FB;border-color:#C3D0E8;color:#1F3864}
+  .banner.good{background:#E6F4EC;border-color:#B7DFC8;color:#0B5C34}
+  code{background:#F3F4F6;padding:1px 5px;border-radius:4px;font-size:12px}
+  .colrow{display:flex;gap:6px;margin-bottom:6px;align-items:center}
+  .colrow input[type=text]{flex:1;border:1px solid #C9CED6;border-radius:6px;padding:6px 8px}
+  .colrow input[type=color]{width:38px;height:32px;padding:0;border:1px solid #C9CED6;border-radius:6px;background:#fff}
+  .prev{width:60px;height:78px;object-fit:cover;border:1px solid #E3E6EA;border-radius:6px}
+  .modalhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .modalhead h2{margin:0;font-size:18px}
+  .x{border:0;background:#F3F4F6;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px}
+  .gate{max-width:360px;margin:80px auto;background:#fff;border:1px solid #E3E6EA;border-radius:12px;padding:22px;text-align:center}
+  .gate input{width:100%;border:1px solid #C9CED6;border-radius:8px;padding:10px;margin:10px 0}
+  @media(max-width:720px){
+    .grid,.grid3{grid-template-columns:1fr}
+    .top{position:static}
+    .modal{padding:8px}
+    .sheet{padding:14px}
+    .wrap{padding:10px}
+    .stats{grid-template-columns:repeat(2,1fr)}
+  }
+</style>
+  <script src="../assets/js/admin-lock.js"></script>
+</head>
+<body>
+
+<div class="top">
+  <h1>📦 Product Manager</h1>
+  <span id="mode" class="pill b">…</span>
+  <a href="../admin.html">← Admin</a>
+  <a href="#" onclick="if(window.adminLockNow){adminLockNow();}return false" title="Lock kar dein">🔒 Lock</a>
+  <a href="../shop.html" target="_blank">View shop ↗</a>
+</div>
+
+<!-- PASSWORD GATE -->
+<div id="gate" class="gate" style="display:none">
+  <div style="font-size:34px">🔒</div>
+  <h2 style="margin:6px 0">Product Manager</h2>
+  <p style="color:#6B7280;font-size:13px;margin:0 0 6px">Sirf shop owner / operator ke liye.<br>Password daal kar andar aayein.</p>
+  <input type="password" id="pw" placeholder="Password">
+  <button class="btn pri" style="width:100%" onclick="unlock()">Unlock</button>
+  <div class="hint" id="gatehint"></div>
+</div>
+
+<div class="wrap" id="app" style="display:none">
+
+  <div id="banners"></div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="card">
+    <div class="toolbar">
+      <input class="grow" id="q" placeholder="🔍 Search — name, SKU, fabric…" oninput="render()">
+      <select id="fg" onchange="render()"><option value="">All genders</option></select>
+      <select id="fc" onchange="render()"><option value="">All categories</option></select>
+      <select id="fs" onchange="render()">
+        <option value="">All stock</option>
+        <option value="in">In stock</option>
+        <option value="low">Low stock (&lt;5)</option>
+        <option value="out">Out of stock</option>
+      </select>
+    </div>
+    <div class="toolbar">
+      <button class="btn pri" onclick="openEditor(null)">➕ Add new product</button>
+      <button class="btn gd" onclick="publish()">🚀 Publish / Live karein</button>
+      <button class="btn" onclick="exportJS()">⬇️ products.js</button>
+      <button class="btn" onclick="exportJSON()">⬇️ JSON backup</button>
+      <button class="btn" onclick="exportCSV()">⬇️ CSV</button>
+      <button class="btn" onclick="document.getElementById('imp').click()">⬆️ Import JSON</button>
+      <input type="file" id="imp" accept=".json" style="display:none" onchange="importJSON(this)">
+      <button class="btn dgr" onclick="resetAll()">↺ Reset (data.js)</button>
+      <span id="dirty" class="pill y" style="display:none">Unpublished changes</span>
+    </div>
+    <div class="row" style="justify-content:space-between;margin-bottom:8px">
+      <div class="hint" style="margin:0">Dikhane ka tareeka:</div>
+      <div class="row" style="gap:6px">
+        <button class="btn sm" id="vTable" onclick="setView('table')">▤ Table</button>
+        <button class="btn sm" id="vCards" onclick="setView('cards')">▦ Cards</button>
+      </div>
+    </div>
+    <div class="tscroll" id="tblwrap"><table id="tbl"></table></div>
+    <div class="pcards" id="pcards"></div>
+    <div class="hint" id="count" style="margin-top:8px"></div>
+    <div class="scrollhint">↕ List apne box me scroll hoti hai · ↔ Table ko left–right bhi ghuma sakte hain · mobile ke liye upar <b>Cards</b> dabayein</div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0 0 8px">🚀 Publish kaise hota hai</h3>
+    <div id="pubhelp"></div>
+  </div>
+</div>
+
+<!-- EDITOR MODAL -->
+<div class="modal" id="modal">
+  <div class="sheet">
+    <div class="modalhead">
+      <h2 id="mtitle">Add product</h2>
+      <button class="x" onclick="closeEditor()">✕</button>
+    </div>
+    <input type="hidden" id="e_orig">
+
+    <div class="grid">
+      <div class="f"><label>SKU / Product ID *</label><input id="e_id" placeholder="CR103"><div class="hint">Unique — jaise CR103, TS305. Badalne par purana delete + naya banega.</div></div>
+      <div class="f"><label>Product name *</label><input id="e_name" placeholder="Satin Bustier Corset — Black"></div>
+    </div>
+
+    <div class="grid3" style="margin-top:12px">
+      <div class="f"><label>Gender</label><select id="e_gender"></select></div>
+      <div class="f"><label>Category</label><select id="e_cat"></select></div>
+      <div class="f"><label>Size chart</label><select id="e_chart"></select></div>
+    </div>
+
+    <div class="grid3" style="margin-top:12px">
+      <div class="f"><label>Selling price ₹ *</label><input id="e_price" type="number" min="0"></div>
+      <div class="f"><label>MRP ₹ (strike price)</label><input id="e_mrp" type="number" min="0"></div>
+      <div class="f"><label>Weight / piece (grams) *</label><input id="e_wt" type="number" min="1" placeholder="250"><div class="hint">Shipping label me use hota hai</div></div>
+    </div>
+
+    <div class="grid3" style="margin-top:12px">
+      <div class="f"><label>Badge</label><input id="e_badge" placeholder="New / Bestseller / Sale"></div>
+      <div class="f"><label>Rating</label><input id="e_rating" type="number" step="0.1" min="0" max="5"></div>
+      <div class="f"><label>Reviews count</label><input id="e_reviews" type="number" min="0"></div>
+    </div>
+
+    <div class="card" style="margin-top:14px;background:#FAFBFC">
+      <label style="font-size:11px;font-weight:700;color:#4B5563;text-transform:uppercase">Main image</label>
+      <div class="row" style="margin-top:6px">
+        <img id="e_prev" class="prev" src="" alt="">
+        <div style="flex:1">
+          <input id="e_img" placeholder="assets/img/c1-corset-black.jpg" oninput="syncPrev()">
+          <div class="row" style="margin-top:6px">
+            <button class="btn sm" onclick="document.getElementById('e_file').click()">📷 Upload photo</button>
+            <input type="file" id="e_file" accept="image/*" style="display:none" onchange="pickImage(this)">
+            <span class="hint" id="upstat"></span>
+          </div>
+        </div>
+      </div>
+      <div class="f" style="margin-top:10px">
+        <label>Gallery (extra images — comma separated paths)</label>
+        <input id="e_gallery" placeholder="assets/img/a1.jpg, assets/img/a2.jpg">
+      </div>
+    </div>
+
+    <div class="grid" style="margin-top:14px">
+      <div class="f">
+        <label>Sizes (comma separated)</label>
+        <div class="row">
+          <input id="e_sizes" style="flex:1" placeholder="S, M, L, XL, XXL" oninput="buildStock()">
+          <button class="btn sm" onclick="presetSizes()">Preset</button>
+        </div>
+        <div class="hint">Bottoms ke liye 28, 30, 32, 34, 36 likhein</div>
+      </div>
+      <div class="f">
+        <label>Stock — per size</label>
+        <div class="stockbox" id="e_stock"></div>
+        <div class="hint">0 = out of stock</div>
+      </div>
+    </div>
+
+    <div class="f" style="margin-top:14px">
+      <label>Colours</label>
+      <div id="e_colours"></div>
+      <button class="btn sm" onclick="addColour()">+ Add colour</button>
+    </div>
+
+    <div class="grid" style="margin-top:14px">
+      <div class="f"><label>Fabric</label><input id="e_fabric"></div>
+      <div class="f"><label>Wash care</label><input id="e_care"></div>
+    </div>
+    <div class="grid" style="margin-top:12px">
+      <div class="f"><label>Extra info (fit / closure)</label><input id="e_extra"></div>
+      <div class="f"><label>Model info</label><input id="e_model" placeholder="Model is 5'6&quot; wearing size M"></div>
+    </div>
+
+    <div class="f" style="margin-top:12px"><label>Description</label><textarea id="e_desc"></textarea></div>
+    <div class="f" style="margin-top:12px"><label>Highlights (ek line me ek)</label><textarea id="e_high"></textarea></div>
+
+    <div class="f" style="margin-top:12px">
+      <label class="row" style="text-transform:none;font-size:13px">
+        <input type="checkbox" id="e_active" style="width:auto;margin-right:6px"> Website par dikhayein (active)
+      </label>
+    </div>
+
+    <div class="row" style="margin-top:16px;justify-content:flex-end">
+      <button class="btn" onclick="closeEditor()">Cancel</button>
+      <button class="btn pri" onclick="saveProduct()">💾 Save product</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/products-live-data.js"></script>
+<script src="../assets/js/products-live.js"></script>
+<script>
+/* ============================================================
+   PRODUCT MANAGER — Add / Update / Delete products
+   Local mode  : localStorage "vs_products" (draft)
+   Server mode : ../api/products.php  (live save, koi upload nahi)
+   ============================================================ */
+const API = "../api/products.php";
+const LS_DRAFT = "vs_products", LS_PUB = "vs_published", LS_TOK = "vs_api_token";
+const PASS = (window.ADMIN_PASS || "NIHAL123");   // asli password assets/js/admin-lock.js me hai — wahi sab admin pages par lagta hai
+const SIZE_PRESETS = {
+  "Corsets": "S, M, L, XL, XXL",
+  "Ladies Wear": "S, M, L, XL, XXL",
+  "Shirts": "S, M, L, XL, XXL",
+  "T-Shirts": "S, M, L, XL, XXL",
+  "Bottoms": "28, 30, 32, 34, 36"
+};
+let SERVER = false, TOKEN = localStorage.getItem(LS_TOK) || "vastraa2026";
+let LIST = [];
+let VIEW = localStorage.getItem("vs_pm_view") || (window.innerWidth <= 760 ? "cards" : "table");
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function toast(m){ const t=$("toast"); t.textContent=m; t.style.display="block";
+  clearTimeout(t._h); t._h=setTimeout(()=>t.style.display="none",2400); }
+const GENDER_OPTS = (typeof window.GENDERS !== "undefined" && window.GENDERS) ? window.GENDERS : ["Women","Men","Unisex"];
+const CAT_OPTS    = (typeof window.CATEGORIES !== "undefined" && window.CATEGORIES) ? window.CATEGORIES : Object.keys(SIZE_PRESETS);
+const CHART_OPTS  = Object.keys((typeof window.SIZE_CHART !== "undefined" && window.SIZE_CHART) || {});
+
+/* ---------- auth ---------- */
+function unlock(){
+  const val = ($("pw") ? $("pw").value : "") || "";
+  if (window.adminCheck ? window.adminCheck(val) : (val.trim().toUpperCase() === PASS.toUpperCase())){
+    if (window.adminSetUnlocked) window.adminSetUnlocked();
+    try{ sessionStorage.setItem("pm_ok","1"); }catch(e){}
+    boot(); return;
+  }
+  const g = $("gatehint");
+  if (g) g.innerHTML = '<span style="color:#B3261E">Galat password — dobara koshish karein</span>';
+  const p = $("pw"); if (p){ p.value = ""; try{ p.focus(); }catch(e){} }
+}
+function boot(){
+  const ok = (window.adminIsUnlocked && window.adminIsUnlocked()) || sessionStorage.getItem("pm_ok")==="1";
+  $("gate").style.display = ok ? "none" : "block";
+  $("app").style.display  = ok ? "grid" : "none";
+  if (!ok) return;
+  fillSelects();
+  detectServer();
+  LIST = load();
+  render();
+  if (!localStorage.getItem("vs_pm_view")) setView(window.innerWidth <= 760 ? "cards" : "table");
+}
+
+/* ---------- data ---------- */
+function load(){
+  try{
+    const s = localStorage.getItem(LS_DRAFT);
+    if (s){ const a = JSON.parse(s); if (Array.isArray(a)) return a; }
+  }catch(e){}
+  return JSON.parse(JSON.stringify(PRODUCTS));
+}
+function save(){ try{ localStorage.setItem(LS_DRAFT, JSON.stringify(LIST)); }catch(e){ toast("Storage full — photo chhoti karein"); } }
+function pubSnapshot(){ try{ return JSON.parse(localStorage.getItem(LS_PUB)||"null"); }catch(e){ return null; } }
+
+function detectServer(){
+  if (typeof fetch !== "function"){ SERVER = false; paintMode(); paintHelp(); return; }
+  try{
+  fetch(API + "?action=ping", {cache:"no-store"})
+    .then(r => r.ok ? r.json() : null)
+    .then(j => {
+      SERVER = !!(j && j.ok);
+      if (SERVER && j.products && j.products.length && !localStorage.getItem(LS_DRAFT)){
+        LIST = j.products; save();
+      }
+      paintMode(); paintHelp(); render();
+    })
+    .catch(() => { SERVER = false; paintMode(); paintHelp(); });
+  }catch(e){ SERVER = false; paintMode(); paintHelp(); }
+}
+function paintMode(){
+  $("mode").textContent = SERVER ? "● LIVE SERVER MODE" : "○ LOCAL MODE";
+  $("mode").className = "pill " + (SERVER ? "g" : "y");
+}
+function paintHelp(){
+  $("pubhelp").innerHTML = SERVER
+    ? `<div class="banner good"><b>Server mode ON.</b> Jo bhi change karein, <b>"🚀 Publish"</b> dabate hi
+       website par turant live ho jayega — koi file upload nahi, koi FTP nahi. Mobile se bhi chalega.</div>`
+    : `<div class="banner warn"><b>Local mode.</b> Changes isi browser me save hote hain. Website par dikhane ke liye
+       <b>"🚀 Publish"</b> dabayein → ek file <code>products-live-data.js</code> download hogi → use
+       <b>assets/js/</b> me upload (replace) kar dein. Bas 30 second ka kaam.</div>
+       <div class="banner info">Chahein to hosting par <code>api/products.php</code> upload kar dein —
+       phir ye panel <b>LIVE SERVER MODE</b> me chalega aur Publish ek click me ho jayega (upload ki ज़रूरत ही नहीं)।</div>`;
+}
+
+/* ---------- stats ---------- */
+function render(){
+  const q = ($("q").value||"").toLowerCase().trim();
+  const fg = $("fg").value, fc = $("fc").value, fs = $("fs").value;
+
+  const total = LIST.length;
+  const active = LIST.filter(p=>p.active!==false).length;
+  let out=0, low=0, val=0, pcs=0;
+  LIST.forEach(p=>{
+    const t = tot(p);
+    if (t===0) out++; else if (t<5) low++;
+    val += t*(p.price||0); pcs += t;
+  });
+  $("stats").innerHTML = `
+    <div class="stat"><b>${total}</b><span>Total products</span></div>
+    <div class="stat"><b>${active}</b><span>Live on site</span></div>
+    <div class="stat"><b style="color:#B3261E">${out}</b><span>Out of stock</span></div>
+    <div class="stat"><b style="color:#8A5300">${low}</b><span>Low stock</span></div>
+    <div class="stat"><b>${pcs}</b><span>Total pieces</span></div>
+    <div class="stat"><b>₹${val.toLocaleString("en-IN")}</b><span>Stock value</span></div>`;
+
+  let rows = LIST.filter(p=>{
+    if (fg && p.gender!==fg) return false;
+    if (fc && p.category!==fc) return false;
+    const t = tot(p);
+    if (fs==="in" && t===0) return false;
+    if (fs==="out" && t>0) return false;
+    if (fs==="low" && !(t>0 && t<5)) return false;
+    if (q && !(p.name+" "+p.id+" "+(p.fabric||"")+" "+p.category).toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  $("tbl").innerHTML = `
+    <tr><th>Image</th><th>SKU</th><th>Product</th><th>Category</th><th>Price</th>
+        <th>Stock (per size)</th><th>Status</th><th>Actions</th></tr>` +
+    (rows.length ? rows.map(p=>{
+      const t = tot(p), live = p.active!==false;
+      return `<tr class="${live?"":"inactive"}">
+        <td><img class="thumb" src="${esc(p.img||"")}" alt="" onerror="this.style.visibility='hidden'"></td>
+        <td class="hint" style="font-size:12px">${esc(p.id)}</td>
+        <td><b>${esc(p.name)}</b><br><span class="hint">${esc(p.gender||"")} · ${p.wt||250} g</span></td>
+        <td>${esc(p.category||"")}<br><span class="hint">${esc(p.chartKey||"")}</span></td>
+        <td>₹${(p.price||0).toLocaleString("en-IN")}<br><span class="hint">MRP ${(p.mrp||0).toLocaleString("en-IN")}</span></td>
+        <td><div class="stockbox">${(p.sizes||[]).map(s=>
+              `<span><small>${esc(s)}</small><input type="number" min="0" value="${p.stock&&p.stock[s]!=null?p.stock[s]:0}"
+                onchange="setStock('${esc(p.id)}','${esc(s)}',this.value)"></span>`).join("")}</div></td>
+        <td>${t===0?'<span class="pill r">Out</span>':t<5?'<span class="pill y">Low '+t+'</span>':'<span class="pill g">In '+t+'</span>'}
+            <br>${live?'<span class="pill b">Live</span>':'<span class="pill r">Hidden</span>'}</td>
+        <td style="white-space:nowrap">
+          <button class="btn sm" onclick="openEditor('${esc(p.id)}')">✏️ Edit</button>
+          <button class="btn sm" onclick="dup('${esc(p.id)}')">⧉</button><br>
+          <button class="btn sm" onclick="toggle('${esc(p.id)}')">${live?"🙈 Hide":"👁️ Show"}</button>
+          <button class="btn sm dgr" onclick="del('${esc(p.id)}')">🗑️</button>
+        </td></tr>`;
+    }).join("") : `<tr><td colspan="8" style="padding:26px;text-align:center;color:#6B7280">
+        Koi product nahi mila. <a href="#" onclick="openEditor(null)">Naya product add karein</a>.</td></tr>`);
+
+  const pcEl = $("pcards");
+  if (pcEl) pcEl.innerHTML = cardsHTML(rows);
+  setView(VIEW);
+  $("count").textContent = `Dikh rahe hain: ${rows.length} / ${total} products`;
+  const pub = pubSnapshot();
+  $("dirty").style.display = JSON.stringify(pub) !== JSON.stringify(LIST) ? "inline-block" : "none";
+}
+const tot = p => Object.values(p.stock||{}).reduce((a,b)=>a+(+b||0),0);
+
+/* ---------- view: table (side-scroll) ya cards (mobile) ---------- */
+function setView(v){
+  VIEW = v; try{ localStorage.setItem("vs_pm_view", v); }catch(e){}
+  const tw = $("tblwrap"), pc = $("pcards");
+  if (!tw || !pc) return;
+  const isT = (v === "table");
+  tw.style.display = isT ? "block" : "none";
+  pc.style.display  = isT ? "none"  : "block";
+  const paint = (el, on) => { if(!el) return;
+    el.style.background  = on ? "#1F3864" : "#fff";
+    el.style.color       = on ? "#fff"    : "inherit";
+    el.style.borderColor = on ? "#1F3864" : "#C9CED6"; };
+  paint($("vTable"), isT); paint($("vCards"), !isT);
+}
+function cardsHTML(rows){
+  if (!rows.length) return `<div class="pcard" style="text-align:center;color:#6B7280">
+      Koi product nahi mila.<br><a href="#" onclick="openEditor(null);return false">Naya product add karein</a></div>`;
+  return rows.map(p=>{
+    const t = tot(p), live = p.active!==false;
+    return `<div class="pcard">
+      <div class="row" style="align-items:flex-start;gap:10px;flex-wrap:nowrap">
+        <img src="${esc(p.img||"")}" style="width:56px;height:74px;object-fit:cover;border-radius:6px;border:1px solid #E3E6EA;background:#F3F4F6"
+             alt="" onerror="this.style.visibility='hidden'">
+        <div style="flex:1;min-width:0">
+          <h4>${esc(p.name)}</h4>
+          <div class="meta">${esc(p.id)} · ${esc(p.gender||"")} · ${esc(p.category||"")} · ${p.wt||250} g</div>
+          <div><b>₹${(p.price||0).toLocaleString("en-IN")}</b>
+               <span class="hint">MRP ₹${(p.mrp||0).toLocaleString("en-IN")}</span></div>
+          <div style="margin-top:5px">
+            ${t===0?'<span class="pill r">Out of stock</span>':t<5?'<span class="pill y">Low · '+t+'</span>':'<span class="pill g">In stock · '+t+'</span>'}
+            ${live?'<span class="pill b">Live</span>':'<span class="pill r">Hidden</span>'}
+          </div>
+        </div>
+      </div>
+      <div class="srow">${(p.sizes||[]).map(s=>
+          `<span>${esc(s)}<input type="number" min="0" value="${p.stock&&p.stock[s]!=null?p.stock[s]:0}"
+             onchange="setStock('${esc(p.id)}','${esc(s)}',this.value)" aria-label="stock ${esc(s)}"></span>`).join("")}
+      </div>
+      <div class="acts">
+        <button class="btn sm" onclick="openEditor('${esc(p.id)}')">✏️ Edit</button>
+        <button class="btn sm" onclick="dup('${esc(p.id)}')">⧉ Copy</button>
+        <button class="btn sm" onclick="toggle('${esc(p.id)}')">${live?"🙈 Hide":"👁️ Show"}</button>
+        <button class="btn sm dgr" onclick="del('${esc(p.id)}')">🗑️ Delete</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+/* ---------- inline actions ---------- */
+function setStock(id, size, v){
+  const p = LIST.find(x=>x.id===id); if(!p) return;
+  p.stock = p.stock || {}; p.stock[size] = Math.max(0, parseInt(v,10)||0);
+  save(); render(); toast("Stock update: " + id + " / " + size);
+}
+function toggle(id){
+  const p = LIST.find(x=>x.id===id); if(!p) return;
+  p.active = p.active===false; save(); render();
+  toast(p.active ? "Website par dikh raha hai" : "Website se chhup gaya");
+}
+function dup(id){
+  const p = LIST.find(x=>x.id===id); if(!p) return;
+  let n = 1, nid = p.id + "-C";
+  while (LIST.some(x=>x.id===nid)) nid = p.id + "-C" + (++n);
+  const c = JSON.parse(JSON.stringify(p)); c.id = nid; c.name = p.name + " (copy)"; c.active = false;
+  LIST.push(c); save(); render(); toast("Copy ban gayi: " + nid);
+}
+function del(id){
+  const p = LIST.find(x=>x.id===id); if(!p) return;
+  if (!confirm("Delete karein?\n\n" + p.id + " — " + p.name + "\n\nYe wapas nahi aayega (Undo nahi hai).")) return;
+  LIST = LIST.filter(x=>x.id!==id); save(); render(); toast("Deleted: " + id);
+}
+function resetAll(){
+  if (!confirm("Reset? Panel ke saare changes hat jaayenge aur data.js ke 13 products wapas aa jayenge.\n\n(Export pehle kar lein — backup ke liye)")) return;
+  localStorage.removeItem(LS_DRAFT);
+  LIST = JSON.parse(JSON.stringify(PRODUCTS)); save(); render(); toast("Reset ho gaya");
+}
+
+/* ---------- editor ---------- */
+function fillSelects(){
+  $("fg").innerHTML = '<option value="">All genders</option>' + GENDER_OPTS.map(g=>`<option>${g}</option>`).join("");
+  $("fc").innerHTML = '<option value="">All categories</option>' + CAT_OPTS.map(c=>`<option>${c}</option>`).join("");
+  $("e_gender").innerHTML = GENDER_OPTS.map(g=>`<option>${g}</option>`).join("");
+  $("e_cat").innerHTML    = CAT_OPTS.map(c=>`<option>${c}</option>`).join("");
+  $("e_chart").innerHTML  = CHART_OPTS.map(c=>`<option>${c}</option>`).join("");
+}
+function openEditor(id){
+  const p = id ? LIST.find(x=>x.id===id) : null;
+  $("mtitle").textContent = p ? "Edit: " + p.name : "Add new product";
+  $("e_orig").value = p ? p.id : "";
+  $("e_id").value = p ? p.id : nextId();
+  $("e_name").value = p ? p.name : "";
+  $("e_gender").value = p ? (p.gender||GENDER_OPTS[0]) : GENDER_OPTS[0];
+  $("e_cat").value    = p ? (p.category||CAT_OPTS[0]) : CAT_OPTS[0];
+  $("e_chart").value  = p ? (p.chartKey||guessChart($("e_cat").value, $("e_gender").value)) : guessChart(CAT_OPTS[0], GENDER_OPTS[0]);
+  $("e_price").value = p ? p.price : "";
+  $("e_mrp").value   = p ? p.mrp : "";
+  $("e_wt").value    = p ? (p.wt||250) : 250;
+  $("e_badge").value = p ? (p.badge||"") : "";
+  $("e_rating").value  = p ? (p.rating||4.5) : 4.5;
+  $("e_reviews").value = p ? (p.reviews||0) : 0;
+  $("e_img").value   = p ? (p.img||"") : "";
+  $("e_gallery").value = p ? (p.gallery||[]).join(", ") : "";
+  $("e_sizes").value = p ? (p.sizes||[]).join(", ") : SIZE_PRESETS[$("e_cat").value] || "S, M, L, XL, XXL";
+  $("e_fabric").value = p ? (p.fabric||"") : "";
+  $("e_care").value   = p ? (p.care||"") : "";
+  $("e_extra").value  = p ? (p.extra||"") : "";
+  $("e_model").value  = p ? (p.model||"") : "";
+  $("e_desc").value   = p ? (p.desc||"") : "";
+  $("e_high").value   = p ? (p.highlights||[]).join("\n") : "";
+  $("e_active").checked = p ? p.active!==false : true;
+  $("e_colours").innerHTML = "";
+  ((p && p.colours) ? p.colours : [{n:"Default",h:"#000000"}]).forEach(c=>addColour(c.n,c.h));
+  buildStock(p ? p.stock : null);
+  syncPrev();
+  $("modal").classList.add("on");
+}
+function closeEditor(){ $("modal").classList.remove("on"); }
+function guessChart(cat, gender){
+  if (cat === "Bottoms") return (gender === "Women" && CHART_OPTS.includes("Women Bottoms")) ? "Women Bottoms" : "Bottoms";
+  return CHART_OPTS.includes(cat) ? cat : (CHART_OPTS[0]||"Corsets");
+}
+function nextId(){
+  const pre = ($("e_cat") && guessChart($("e_cat").value, $("e_gender").value)) ? $("e_cat").value.slice(0,2).toUpperCase() : "PR";
+  let n = 101; while (LIST.some(x=>x.id===pre+n)) n++;
+  return pre + n;
+}
+function presetSizes(){ $("e_sizes").value = SIZE_PRESETS[$("e_cat").value] || "S, M, L, XL, XXL"; buildStock(); }
+function sizesArr(){ return ($("e_sizes").value||"").split(",").map(s=>s.trim()).filter(Boolean); }
+function buildStock(stock){
+  const sizes = sizesArr();
+  $("e_stock").innerHTML = sizes.length
+    ? sizes.map(s=>`<span><small>${esc(s)}</small><input type="number" min="0" data-s="${esc(s)}" value="${stock&&stock[s]!=null?stock[s]:0}"></span>`).join("")
+    : '<span class="hint">Upar sizes likhein</span>';
+}
+function addColour(n,h){
+  const d = document.createElement("div"); d.className = "colrow";
+  d.innerHTML = `<input type="text" placeholder="Colour name" value="${esc(n||"")}">
+                 <input type="color" value="${esc(h||"#000000")}">
+                 <button class="btn sm dgr" onclick="this.parentNode.remove()">✕</button>`;
+  $("e_colours").appendChild(d);
+}
+function syncPrev(){
+  const v = $("e_img").value;
+  const el = $("e_prev");
+  if (v){ el.src = v; el.style.visibility="visible"; } else { el.style.visibility="hidden"; }
+}
+function pickImage(inp){
+  const f = inp.files && inp.files[0]; if (!f) return;
+  $("upstat").textContent = "Processing…";
+  compress(f, 900, d => {
+    if (!d){ $("upstat").textContent = "Fail"; return; }
+    if (SERVER){
+      fetch(API + "?action=upload", {method:"POST", headers:{"Content-Type":"application/json"},
+            body: JSON.stringify({token: TOKEN, name: f.name, data: d})})
+        .then(r=>r.json())
+        .then(j=>{ if (j.ok){ $("e_img").value = j.path; syncPrev(); $("upstat").textContent = "✓ Uploaded"; }
+                   else { $("e_img").value = d; syncPrev(); $("upstat").textContent = "Saved in page (server fail)"; } })
+        .catch(()=>{ $("e_img").value = d; syncPrev(); $("upstat").textContent = "Saved in page"; });
+    } else {
+      $("e_img").value = d; syncPrev();
+      $("upstat").textContent = "✓ Ready (page me save — Publish ke baad upload hoga)";
+    }
+    inp.value = "";
+  });
+}
+function compress(file, maxW, cb){
+  const fr = new FileReader();
+  fr.onload = e => {
+    const im = new Image();
+    im.onload = () => {
+      const sc = Math.min(1, maxW/im.width);
+      const c = document.createElement("canvas");
+      c.width = Math.round(im.width*sc); c.height = Math.round(im.height*sc);
+      c.getContext("2d").drawImage(im,0,0,c.width,c.height);
+      cb(c.toDataURL("image/jpeg", 0.72));
+    };
+    im.onerror = ()=>cb(null);
+    im.src = e.target.result;
+  };
+  fr.onerror = ()=>cb(null);
+  fr.readAsDataURL(file);
+}
+
+function saveProduct(){
+  const id = ($("e_id").value||"").trim();
+  const name = ($("e_name").value||"").trim();
+  const price = parseInt($("e_price").value,10);
+  if (!id)   return toast("SKU / ID zaroori hai");
+  if (!name) return toast("Product name zaroori hai");
+  if (!(price > 0)) return toast("Selling price zaroori hai");
+
+  const orig = $("e_orig").value;
+  if (!orig && LIST.some(x=>x.id===id)) return toast("Ye SKU pehle se hai — dusra use karein");
+  if (orig && orig !== id && LIST.some(x=>x.id===id)) return toast("Ye SKU pehle se hai");
+
+  const sizes = sizesArr();
+  const stock = {};
+  $("e_stock").querySelectorAll("input[data-s]").forEach(i=>{ stock[i.dataset.s] = Math.max(0, parseInt(i.value,10)||0); });
+  const colours = [...$("e_colours").querySelectorAll(".colrow")].map(r=>{
+    const t = r.querySelector("input[type=text]").value.trim();
+    return t ? {n:t, h:r.querySelector("input[type=color]").value} : null;
+  }).filter(Boolean);
+
+  const obj = {
+    id, name,
+    gender: $("e_gender").value,
+    category: $("e_cat").value,
+    chartKey: (CHART_OPTS.indexOf($("e_chart").value) >= 0)
+              ? $("e_chart").value
+              : guessChart($("e_cat").value, $("e_gender").value),
+    price, mrp: parseInt($("e_mrp").value,10) || price,
+    rating: parseFloat($("e_rating").value) || 4.5,
+    reviews: parseInt($("e_reviews").value,10) || 0,
+    badge: $("e_badge").value.trim(), wt: parseInt($("e_wt").value,10) || 250,
+    img: $("e_img").value.trim(),
+    gallery: ($("e_gallery").value||"").split(",").map(s=>s.trim()).filter(Boolean),
+    colours: colours.length ? colours : [{n:"Default",h:"#000000"}],
+    sizes, stock,
+    fabric: $("e_fabric").value.trim(), care: $("e_care").value.trim(),
+    extra: $("e_extra").value.trim(), model: $("e_model").value.trim(),
+    desc: $("e_desc").value.trim(),
+    highlights: ($("e_high").value||"").split("\n").map(s=>s.trim()).filter(Boolean),
+    active: $("e_active").checked
+  };
+  if (!obj.gallery.length) obj.gallery = [obj.img].filter(Boolean);
+
+  const i = LIST.findIndex(x=>x.id===orig);
+  if (i >= 0) LIST[i] = obj; else LIST.push(obj);
+  save(); closeEditor(); render();
+  toast(i>=0 ? "Update ho gaya: " + id : "Naya product add hua: " + id);
+}
+
+/* ---------- publish / export ---------- */
+function publish(){
+  const live = LIST.filter(p=>p.active!==false);
+  if (!live.length) return toast("Koi active product nahi");
+  save();
+  if (SERVER){
+    fetch(API + "?action=save", {method:"POST", headers:{"Content-Type":"application/json"},
+          body: JSON.stringify({token: TOKEN, products: LIST})})
+      .then(r=>r.json())
+      .then(j=>{
+        if (j.ok){ localStorage.setItem(LS_PUB, JSON.stringify(LIST)); render(); toast("🚀 Live ho gaya — " + live.length + " products"); }
+        else toast("Save fail: " + (j.error||"unknown"));
+      })
+      .catch(e=>toast("Server error: " + e));
+  } else {
+    localStorage.setItem(LS_PUB, JSON.stringify(LIST));
+    render();
+    download("products-live-data.js",
+      "/* AUTO-GENERATED by Product Manager — " + new Date().toLocaleString("en-IN") + " */\n" +
+      "window.__LIVE_PRODUCTS = " + JSON.stringify(live, null, 1) + ";\n");
+    toast("File download hui — assets/js/ me upload karein");
+    setTimeout(()=>alert(
+      "✅ Publish ready!\n\n" +
+      "Ek file download hui hai: products-live-data.js\n\n" +
+      "Ab bas itna karein:\n" +
+      "1) Hosting cPanel / File Manager kholein\n" +
+      "2) assets/js/ folder me jayein\n" +
+      "3) products-live-data.js upload karein (replace: YES)\n\n" +
+      "Ho gaya — website par " + live.length + " products turant dikhenge.\n\n" +
+      "(Is browser me to abhi se dikhenge, preview ke liye shop.html kholein.)"
+    ), 400);
+  }
+}
+function exportJS(){
+  download("products.js", "const PRODUCTS = " + JSON.stringify(LIST.filter(p=>p.active!==false), null, 1) + ";\n");
+  toast("products.js download hua — data.js me paste kar dein");
+}
+function exportJSON(){ download("products-backup.json", JSON.stringify(LIST, null, 1)); toast("Backup download hua"); }
+function exportCSV(){
+  const rows = [["SKU","Name","Gender","Category","Price","MRP","Weight(g)","Sizes","Stock","Total","Colours","Active","Image"]];
+  LIST.forEach(p=>rows.push([p.id,p.name,p.gender,p.category,p.price,p.mrp,p.wt,
+    (p.sizes||[]).join(" "), (p.sizes||[]).map(s=>(p.stock||{})[s]||0).join(" "), tot(p),
+    (p.colours||[]).map(c=>c.n).join(" "), p.active===false?"No":"Yes", p.img]));
+  download("products.csv", "\uFEFF" + rows.map(r=>r.map(c=>'"'+String(c==null?"":c).replace(/"/g,'""')+'"').join(",")).join("\n"));
+  toast("CSV download hua");
+}
+function importJSON(inp){
+  const f = inp.files && inp.files[0]; if (!f) return;
+  const fr = new FileReader();
+  fr.onload = e => {
+    try{
+      const a = JSON.parse(e.target.result);
+      if (!Array.isArray(a)) throw 0;
+      if (!confirm(a.length + " products import karein? Abhi ke sab replace ho jayenge.")) return;
+      LIST = a; save(); render(); toast("Import ho gaya: " + a.length);
+    }catch(err){ toast("Galat JSON file"); }
+    inp.value = "";
+  };
+  fr.readAsText(f);
+}
+function download(name, text){
+  const b = new Blob([text], {type:"application/octet-stream"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(b); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+}
+
+$("e_cat").addEventListener("change", ()=>{ $("e_chart").value = guessChart($("e_cat").value, $("e_gender").value); presetSizes(); });
+$("e_gender").addEventListener("change", ()=>{ $("e_chart").value = guessChart($("e_cat").value, $("e_gender").value); });
+document.getElementById("modal").addEventListener("click", e=>{ if (e.target.id==="modal") closeEditor(); });
+
+document.addEventListener("DOMContentLoaded", function(){ boot();
+  const p = document.getElementById("pw");
+  if (p) p.addEventListener("keydown", e => { if (e.key === "Enter") unlock(); });
+});
+if (document.readyState !== "loading") boot();
+</script>
+</body>
+</html>

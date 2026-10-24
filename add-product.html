@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quick Listing Tool — VastraWave Admin</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#f4f5f7;color:#1c2431;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5}
+  .top{background:#1c2431;color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+  .top h1{font-size:17px;margin:0}
+  .top a{color:#C9A227;font-size:13px}
+  .wrap{max-width:1100px;margin:0 auto;padding:18px}
+  .grid2{display:grid;grid-template-columns:1fr;gap:16px}
+  @media(min-width:900px){.grid2{grid-template-columns:1.1fr .9fr}}
+  .card{background:#fff;border:1px solid #dfe3e8;border-radius:12px;padding:16px}
+  h2{font-size:15px;margin:0 0 12px}
+  label{display:block;font-size:12.5px;font-weight:600;margin:10px 0 4px}
+  input,select,textarea{width:100%;height:40px;border:1px solid #dfe3e8;border-radius:8px;padding:0 10px;background:#fff;font:inherit}
+  textarea{height:70px;padding:8px 10px;resize:vertical}
+  input:focus,select:focus,textarea:focus{outline:2px solid #7A1F2B;border-color:#7A1F2B}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .btn{height:40px;border:1px solid transparent;border-radius:8px;background:#7A1F2B;color:#fff;font-weight:600;padding:0 16px;cursor:pointer}
+  .btn:hover{background:#5C1620}
+  .btn.ghost{background:#fff;color:#7A1F2B;border-color:#7A1F2B}
+  .btn.gold{background:#C9A227;color:#3A2C00}
+  .btn.sm{height:32px;font-size:12.5px;padding:0 10px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .muted{color:#6b7684;font-size:12px}
+  .crow{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+  .crow input[type=text]{flex:1}
+  .crow input[type=color]{width:44px;height:40px;padding:2px;cursor:pointer}
+  .list .item{display:flex;gap:10px;align-items:center;border:1px solid #e7e1d9;border-radius:10px;padding:8px;margin-bottom:8px;background:#fdfcfa}
+  .list .item img{width:46px;height:46px;object-fit:cover;border-radius:8px;background:#eee}
+  .list .item .nm{flex:1;font-size:13px;font-weight:600}
+  pre{background:#1c2431;color:#e8e2d9;padding:12px;border-radius:10px;overflow:auto;font-size:12px;max-height:340px;white-space:pre}
+  .box{background:#f8faf9;border:1px solid #d9e6de;border-left:4px solid #2f7d5d;padding:10px 12px;font-size:12.5px;margin:12px 0}
+  .warn{background:#fdf8f3;border:1px solid #eddcc9;border-left:4px solid #c07a2c;padding:10px 12px;font-size:12.5px;margin:12px 0}
+  .tag{display:inline-block;background:#eef2f7;border:1px solid #d5dce5;border-radius:3px;padding:1px 7px;font-size:11px}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <h1>🧾 Quick Listing Tool</h1>
+  <div class="row">
+    <a href="../admin.html" style="color:#C9A227">← Admin</a>
+    <a href="../clothesline.html" style="color:#C9A227">View store →</a>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="box">
+    <b>Kaise use karein:</b> 1) Client ki photo ko <code>assets/img/</code> me daal dein (jaise <code>kurti-red.jpg</code>) ·
+    2) Neeche form bhar ke <b>Add product</b> dabayein · 3) Saare products add hone ke baad
+    <b>Copy code</b> → <code>assets/js/data.js</code> me <code>PRODUCTS = [ ... ]</code> ki jagah paste kar dein.
+  </div>
+
+  <div class="grid2">
+    <!-- FORM -->
+    <div class="card">
+      <h2>Naya product</h2>
+      <div class="two">
+        <div><label>SKU / ID *</label><input id="f-id" placeholder="LW204"></div>
+        <div><label>Badge</label>
+          <select id="f-badge">
+            <option value="">— none —</option>
+            <option>New</option><option>Bestseller</option><option>Few left</option><option>Party</option><option>Sale</option>
+          </select>
+        </div>
+      </div>
+      <label>Product name *</label>
+      <input id="f-name" placeholder="Floral Printed Midi Dress — Pink">
+
+      <div class="three">
+        <div><label>Section</label><select id="f-gender"></select></div>
+        <div><label>Category</label><select id="f-cat"></select></div>
+        <div><label>Chart</label><select id="f-chart"></select></div>
+      </div>
+
+      <div class="three">
+        <div><label>Selling price ₹ *</label><input id="f-price" type="number" placeholder="1499"></div>
+        <div><label>MRP ₹ *</label><input id="f-mrp" type="number" placeholder="2499"></div>
+        <div><label>Weight (grams)</label><input id="f-wt" type="number" placeholder="320"></div>
+      </div>
+
+      <label>Image file</label>
+      <input id="f-img" placeholder="assets/img/kurti-red.jpg">
+
+      <label>Sizes (comma separated) *</label>
+      <input id="f-sizes" placeholder="S,M,L,XL,XXL   ya   28,30,32,34,36">
+      <div class="two">
+        <div><label>Stock per size</label><input id="f-stock" type="number" value="8"></div>
+        <div><label>Out-of-stock sizes</label><input id="f-out" placeholder="L,XXL (khali chhod dein)"></div>
+      </div>
+
+      <label>Colours</label>
+      <div id="colours"></div>
+      <button class="btn sm ghost" onclick="addColour()">+ Add colour</button>
+
+      <label>Fabric</label><input id="f-fabric" placeholder="Rayon crepe, fully lined">
+      <label>Care</label><input id="f-care" placeholder="Machine wash cold, dry in shade">
+      <label>Extra (optional)</label><input id="f-extra" placeholder="Padded bust, side zip">
+      <label>Model info</label><input id="f-model" placeholder="Model is 5'4&quot; wearing size M">
+      <label>Description</label><textarea id="f-desc" placeholder="2-3 line me product ke baare me"></textarea>
+      <label>Highlights (comma separated)</label><input id="f-hl" placeholder="Fully lined, Side pockets, Midi length">
+
+      <div class="row" style="margin-top:14px">
+        <button class="btn" onclick="addProduct()">➕ Add product</button>
+        <button class="btn ghost" onclick="clearForm()">Clear form</button>
+      </div>
+    </div>
+
+    <!-- LIST + EXPORT -->
+    <div>
+      <div class="card">
+        <h2>Added products <span class="tag" id="cnt">0</span></h2>
+        <div class="list" id="list"></div>
+        <div class="row">
+          <button class="btn gold" onclick="gen()">⚙️ Generate code</button>
+          <button class="btn sm ghost" onclick="dl('js')">⬇ Download products.js</button>
+          <button class="btn sm ghost" onclick="dl('csv')">⬇ CSV (client record)</button>
+          <button class="btn sm ghost" onclick="wipe()">🗑 Clear all</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <h2>Generated code</h2>
+        <div class="muted" style="margin-bottom:8px">Copy karke <code>data.js</code> me <code>PRODUCTS = [ ... ]</code> replace kar dein.</div>
+        <pre id="out">Yahan code aayega…</pre>
+        <button class="btn sm" onclick="copyOut()">📋 Copy code</button>
+      </div>
+
+      <div class="warn" style="margin-top:16px">
+        <b>Photo ka size:</b> square (1:1), min 1200×1200, 500KB se kam. Client raw photo bheje to pehle
+        background remove / crop kar lein — catalogue me sabhi photos ka ek jaisa look hona chahiye.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/products-live-data.js"></script>
+<script src="../assets/js/products-live.js"></script>
+<script>
+/* Categories / genders data.js se */
+let CATS = [], CHARTKEYS = [];
+try{
+  CATS = CATEGORIES.slice();
+  CHARTKEYS = Object.keys(SIZE_CHART);
+}catch(e){ CATS = ["Corsets","Ladies Wear","Shirts","T-Shirts","Bottoms"]; }
+
+function fill(sel, arr, placeholder){
+  const s = document.getElementById(sel);
+  s.innerHTML = (placeholder ? `<option value="">— ${placeholder} —</option>` : "") +
+    arr.map(x=>`<option>${x}</option>`).join("");
+}
+fill("f-gender", ["Women","Men","Unisex"]);
+fill("f-cat", CATS);
+fill("f-chart", CHARTKEYS, "auto (category)");
+addColour();
+
+function addColour(){
+  const d = document.createElement("div");
+  d.className = "crow";
+  d.innerHTML = `<input type="color" value="#C9A227" class="ch">
+                 <input type="text" placeholder="Colour name (e.g. Wine)">
+                 <button class="btn sm ghost" onclick="this.parentElement.remove()">✕</button>`;
+  document.getElementById("colours").appendChild(d);
+}
+function colours(){
+  return [...document.querySelectorAll("#colours .crow")]
+    .map(r=>{ const n = r.querySelector('input[type=text]').value.trim();
+              const h = r.querySelector('input[type=color]').value;
+              return n ? {n, h} : null; }).filter(Boolean);
+}
+function stockObj(sizes, def, out){
+  const o = {};
+  sizes.forEach(s => o[s] = out.includes(s) ? 0 : (parseInt(def,10) || 5));
+  return o;
+}
+function addProduct(){
+  const id = document.getElementById("f-id").value.trim();
+  const name = document.getElementById("f-name").value.trim();
+  const price = +document.getElementById("f-price").value;
+  const mrp = +document.getElementById("f-mrp").value;
+  const sizes = document.getElementById("f-sizes").value.split(",").map(s=>s.trim()).filter(Boolean);
+  if(!id || !name || !price || !sizes.length){ alert("ID, name, price aur sizes zaroori hain"); return; }
+  const img = document.getElementById("f-img").value.trim() || "assets/img/placeholder.jpg";
+  const out = document.getElementById("f-out").value.split(",").map(s=>s.trim());
+  const p = {
+    id, name,
+    gender: document.getElementById("f-gender").value,
+    category: document.getElementById("f-cat").value,
+    chartKey: document.getElementById("f-chart").value || undefined,
+    price, mrp: mrp || Math.round(price*1.6),
+    rating: 4.5, reviews: 0,
+    badge: document.getElementById("f-badge").value,
+    wt: +document.getElementById("f-wt").value || 250,
+    img, gallery: [img],
+    colours: colours().length ? colours() : [{n:"As shown", h:"#CCCCCC"}],
+    sizes, stock: stockObj(sizes, document.getElementById("f-stock").value, out),
+    fabric: document.getElementById("f-fabric").value.trim(),
+    care: document.getElementById("f-care").value.trim(),
+    extra: document.getElementById("f-extra").value.trim(),
+    model: document.getElementById("f-model").value.trim() || "Model is 5'6\" wearing size M",
+    desc: document.getElementById("f-desc").value.trim(),
+    highlights: document.getElementById("f-hl").value.split(",").map(s=>s.trim()).filter(Boolean)
+  };
+  const all = getAdded(); all.push(p); store(all);
+  clearForm(); renderList(); toast("Added: " + name);
+}
+function getAdded(){ try{ return JSON.parse(localStorage.getItem("vs_added")||"[]"); }catch(e){ return []; } }
+function store(a){ try{ localStorage.setItem("vs_added", JSON.stringify(a)); }catch(e){} }
+function renderList(){
+  const a = getAdded();
+  document.getElementById("cnt").textContent = a.length;
+  document.getElementById("list").innerHTML = a.length ? a.map((p,i)=>`
+    <div class="item">
+      <img src="../${p.img}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2246%22 height=%2246%22><rect width=%2246%22 height=%2246%22 fill=%22%23eee%22/></svg>'">
+      <div class="nm">${p.name}<br><span class="muted">${p.gender} · ${p.category} · ₹${p.price} · ${p.sizes.join("/")}</span></div>
+      <button class="btn sm ghost" onclick="del(${i})">✕</button>
+    </div>`).join("") : `<div class="muted">Abhi kuch add nahi hua.</div>`;
+}
+function del(i){ const a = getAdded(); a.splice(i,1); store(a); renderList(); }
+function wipe(){ if(confirm("Saare added products clear kar dein?")){ store([]); renderList(); document.getElementById("out").textContent="Yahan code aayega…"; } }
+function clearForm(){
+  ["f-id","f-name","f-price","f-mrp","f-wt","f-img","f-sizes","f-out","f-fabric","f-care","f-extra","f-model","f-desc","f-hl"]
+    .forEach(x=>document.getElementById(x).value="");
+  document.getElementById("colours").innerHTML=""; addColour();
+}
+function objCode(p){
+  const q = s => '"' + String(s).replace(/"/g,'\\"') + '"';
+  const stock = "{" + p.sizes.map(s=>q(s)+":"+p.stock[s]).join(",") + "}";
+  const cols = "[" + p.colours.map(c=>`{n:${q(c.n)},h:${q(c.h)}}`).join(",") + "]";
+  const hl = "[" + p.highlights.map(q).join(",") + "]";
+  return `  {
+    id: ${q(p.id)}, name: ${q(p.name)}, gender: ${q(p.gender)}, category: ${q(p.category)}${p.chartKey?`, chartKey: ${q(p.chartKey)}`:""},
+    price: ${p.price}, mrp: ${p.mrp}, rating: 4.5, reviews: 0, badge: ${q(p.badge)}, wt: ${p.wt},
+    img: ${q(p.img)}, gallery: [${q(p.img)}],
+    colours: ${cols},
+    sizes: [${p.sizes.map(q).join(",")}], stock: ${stock},
+    fabric: ${q(p.fabric)}, care: ${q(p.care)}, extra: ${q(p.extra)},
+    model: ${q(p.model)},
+    desc: ${q(p.desc)},
+    highlights: ${hl}
+  }`;
+}
+function gen(){
+  const a = getAdded();
+  document.getElementById("out").textContent = a.length
+    ? "const PRODUCTS = [\n" + a.map(objCode).join(",\n") + "\n];"
+    : "Pehle koi product add karein.";
+}
+function dl(kind){
+  const a = getAdded(); if(!a.length){ alert("Pehle product add karein"); return; }
+  let text, name, type;
+  if(kind === "js"){
+    text = "const PRODUCTS = [\n" + a.map(objCode).join(",\n") + "\n];\n";
+    name = "products.js"; type = "application/javascript";
+  } else {
+    const head = ["SKU","Name","Gender","Category","Price","MRP","Weight(g)","Sizes","Stock","Colours","Image","Fabric","Care"];
+    const rows = a.map(p=>[p.id,p.name,p.gender,p.category,p.price,p.mrp,p.wt,p.sizes.join("|"),
+      p.sizes.map(s=>s+":"+p.stock[s]).join("|"), p.colours.map(c=>c.n).join("|"), p.img, p.fabric, p.care]);
+    text = [head].concat(rows).map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
+    name = "products.csv"; type = "text/csv";
+  }
+  const b = new Blob([text], {type}); const u = URL.createObjectURL(b);
+  const x = document.createElement("a"); x.href = u; x.download = name; x.click(); URL.revokeObjectURL(u);
+}
+function copyOut(){
+  const t = document.getElementById("out").textContent;
+  navigator.clipboard ? navigator.clipboard.writeText(t).then(()=>toast("Copy ho gaya ✅"))
+                      : alert("Select karke Ctrl+C karein");
+}
+function toast(m){
+  let t = document.getElementById("toast");
+  if(!t){ t = document.createElement("div"); t.id="toast";
+    t.style.cssText="position:fixed;left:50%;transform:translateX(-50%);bottom:24px;background:#1c2431;color:#fff;padding:10px 18px;border-radius:8px;z-index:999;font-size:13px";
+    document.body.appendChild(t); }
+  t.textContent = m; t.style.display="block";
+  clearTimeout(t._t); t._t = setTimeout(()=>t.style.display="none", 2000);
+}
+renderList();
+</script>
+</body>
+</html>
