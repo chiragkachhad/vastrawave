@@ -589,6 +589,12 @@ footer#site-footer h4{color:var(--vv-gold)}
           text-shadow:0 3px 0 rgba(58,13,22,.55),0 10px 28px rgba(0,0,0,.35);white-space:nowrap}
   .poster-big .off{color:#FFD36E}
   .poster-sub{margin-top:7px;font-size:clamp(11px,1.5vw,14px);font-weight:700;color:rgba(255,255,255,.92);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #shopNowBtn{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--posterH,150px) + var(--announceH,38px) + 12px);z-index:27;
+    background:linear-gradient(95deg,#E0245E,#7A1F2B);color:#fff;text-decoration:none;font-weight:900;letter-spacing:.4px;
+    font-size:clamp(15px,2.4vw,20px);padding:13px 34px;border-radius:99px;border:2px solid rgba(255,255,255,.65);
+    box-shadow:0 14px 34px rgba(20,4,24,.5);animation:shopPulse 1.8s ease-in-out infinite;white-space:nowrap}
+  #shopNowBtn:hover{filter:brightness(1.14)}
+  @keyframes shopPulse{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.06)}}
   .poster-cta{background:#fff;color:#7A1F2B;text-decoration:none;font-weight:900;font-size:clamp(13px,1.8vw,17px);
           padding:14px 20px;border-radius:99px;box-shadow:0 12px 28px rgba(0,0,0,.35);white-space:nowrap;transition:.18s}
   .poster-cta:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 16px 34px rgba(0,0,0,.42)}
@@ -719,10 +725,12 @@ footer#site-footer h4{color:var(--vv-gold)}
 <!-- ============ ANNOUNCEMENT BAR: offers ============ -->
 <div class="announcebar" id="announcebar">
   <div class="announce-track" id="announceTrack">
-    <span class="hi">🔥 Festive Sale — Up to 70% OFF</span><span>🚚 ₹999+ Free Shipping</span><span class="hi">💵 COD Available</span><span>🎈 Ghumte balloon par click — product khulega</span><span class="hi">↩️ 7-Day Easy Return</span><span>👆 Kapde par click karo — bada 3D view dikhega</span>
-    <span class="hi">🔥 Festive Sale — Up to 70% OFF</span><span>🚚 ₹999+ Free Shipping</span><span class="hi">💵 COD Available</span><span>🎈 Ghumte balloon par click — product khulega</span><span class="hi">↩️ 7-Day Easy Return</span><span>👆 Kapde par click karo — bada 3D view dikhega</span>
+    <span class="hi">🔥 Festive Sale — Up to 70% OFF</span><span>🚚 ₹999+ Free Shipping</span><span class="hi">📱 UPI se Easy Payment</span><span>🎈 Ghumte balloon par click — product khulega</span><span class="hi">↩️ 7-Day Easy Return</span><span>👆 Kapde par cursor le jao — bada 3D view dikhega</span>
+    <span class="hi">🔥 Festive Sale — Up to 70% OFF</span><span>🚚 ₹999+ Free Shipping</span><span class="hi">📱 UPI se Easy Payment</span><span>🎈 Ghumte balloon par click — product khulega</span><span class="hi">↩️ 7-Day Easy Return</span><span>👆 Kapde par cursor le jao — bada 3D view dikhega</span>
   </div>
 </div>
+
+<a id="shopNowBtn" href="shop.html">🛍️ SHOP NOW</a>
 
 <!-- ============ POSTER (niche) ============ -->
 <div class="poster" id="poster">
@@ -730,9 +738,9 @@ footer#site-footer h4{color:var(--vv-gold)}
     <div class="poster-badge">🎉 SALE<small>LIVE HAI</small></div>
     <div class="poster-txt">
       <div class="poster-big">UP TO <span class="off">70% OFF</span> ✨ NEW COLLECTION</div>
-      <div class="poster-sub">🚚 ₹999+ par FREE shipping &nbsp;·&nbsp; 💵 COD available &nbsp;·&nbsp; ↩️ 7-day easy return &nbsp;·&nbsp; 👆 Kapde ya 🎈 balloon par click karo — bada view khulega</div>
+      <div class="poster-sub">🚚 ₹999+ par FREE shipping &nbsp;·&nbsp; 📱 UPI payment &nbsp;·&nbsp; ↩️ 7-day easy return &nbsp;·&nbsp; 👆 Kapde par cursor le jao ya 🎈 balloon par click karo</div>
     </div>
-    <a class="poster-cta" href="shop.html">🛍️ Shop karo →</a>
+    <a class="poster-cta" href="shop.html">🛍️ SHOP NOW →</a>
   </div>
 </div>
 
@@ -813,7 +821,9 @@ var CONFIG = {
 
   freeShippingAbove: 999,
   shippingCharge: 60,
-  codAvailable: true,
+  codAvailable: false,   // FILHAL BAND — abhi sirf UPI payment chalega
+  upiId: "kachhad.2000@ptaxis",
+  upiPayName: "VastraWave",
   packagingWeight: 50,
 
   coupon: { code: "VASTRAA10", percent: 10, minCart: 999 },
@@ -829,7 +839,7 @@ var CONFIG = {
   announces: [
     "FREE shipping above ₹999 · <b>VASTRAA10</b> — 10% off",
     "Extra <b>5% OFF</b> on prepaid orders (UPI / Card)",
-    "COD available · 7-day easy exchange"
+    "UPI payment · 7-day easy exchange"
   ]
 };
 
@@ -1190,6 +1200,7 @@ function addToCart(id, size, colour, qty){
   else c.push({ key:k, id, size, colour, qty, price:p.price, name:p.name, img:"" });
   saveCart(c);
   toast("Cart me add ho gaya — " + p.name);
+  try{ if (window.FW) FW.celebrate(); }catch(e){}   /* 🎆 Diwali fatake */
 }
 function setQty(k, q){
   const c = getCart(); const i = c.find(x=>x.key===k); if(!i) return;
@@ -1445,6 +1456,137 @@ function saveOrder(o){ const l = getOrders(); l.unshift(o); store.set("vs_orders
 
 /* ---------- Init ---------- */
 document.addEventListener("DOMContentLoaded", ()=> injectChrome());
+
+</script>
+<script>
+/* ============================================================
+   DIWALI FIREWORKS — click / add-to-cart par fatake 🎆
+   window.FW.burst(x, y)   -> us jagah fataka phutega
+   window.FW.rockets(n)    -> aasmaan me n rocket fatake
+   window.FW.celebrate()   -> click wali jagah burst + 2 rocket
+   Halka rakha hai — mobile par bhi smooth, khatam hote hi ruk jata hai.
+   ============================================================ */
+(function () {
+  "use strict";
+  var COLORS = ["#FFD166", "#FF9F1C", "#FF5D8F", "#E0245E", "#7BE495", "#2EC4B6", "#4EA8FF", "#A06CD5", "#FFF3B0"];
+  var cv = null, ctx = null, W = 0, H = 0, raf = 0, running = false, lastT = 0;
+  var parts = [], rocketsArr = [], burstsFired = 0;
+  var lastPt = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+  var reduced = false;
+  try { reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
+  document.addEventListener("pointerdown", function (e) { lastPt.x = e.clientX; lastPt.y = e.clientY; }, { passive: true });
+
+  function isMobile() { return window.innerWidth < 760; }
+  function cap() { return isMobile() ? 170 : 340; }
+  function rnd(a, b) { return a + Math.random() * (b - a); }
+  function col() { return COLORS[Math.floor(Math.random() * COLORS.length)]; }
+
+  function ensure() {
+    if (cv) return true;
+    if (!document.body) return false;
+    cv = document.createElement("canvas");
+    cv.id = "fwCanvas";
+    cv.style.cssText = "position:fixed;inset:0;width:100%;height:100%;z-index:99999;pointer-events:none;display:none";
+    document.body.appendChild(cv);
+    ctx = cv.getContext("2d");
+    size();
+    window.addEventListener("resize", size);
+    return true;
+  }
+  function size() {
+    if (!cv) return;
+    var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function spawnBurst(x, y, n, power) {
+    burstsFired++;
+    for (var i = 0; i < n; i++) {
+      if (parts.length >= cap()) break;
+      var a = Math.random() * 6.2832;
+      var sp = rnd(40, 300) * (power || 1);
+      parts.push({
+        x: x, y: y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 40,
+        life: 0, ttl: rnd(0.65, 1.35), r: rnd(1.6, 3.3), c: col(), sd: Math.random() * 6.28
+      });
+    }
+  }
+  function launchRocket() {
+    var x = rnd(W * 0.12, W * 0.88);
+    var targetY = rnd(H * 0.16, H * 0.42);
+    var vy = -Math.sqrt(2 * 540 * Math.max(60, H - targetY));
+    rocketsArr.push({ x: x, y: H + 6, vy: vy, c: col() });
+    burstsFired++;
+  }
+
+  function frame(now) {
+    if (!running) return;
+    var dt = lastT ? Math.min(0.045, (now - lastT) / 1000) : 0.016;
+    lastT = now;
+    ctx.clearRect(0, 0, W, H);
+
+    /* rockets upar jaate hue */
+    for (var i = rocketsArr.length - 1; i >= 0; i--) {
+      var rk = rocketsArr[i];
+      rk.vy += 540 * dt; rk.y += rk.vy * dt;
+      if (Math.random() < 0.75 && parts.length < cap())
+        parts.push({ x: rk.x + rnd(-2, 2), y: rk.y + 6, vx: rnd(-16, 16), vy: rnd(20, 60), life: 0, ttl: rnd(0.25, 0.5), r: rnd(1, 2), c: "#FFD166", sd: 0 });
+      ctx.globalAlpha = 1; ctx.fillStyle = rk.c;
+      ctx.beginPath(); ctx.arc(rk.x, rk.y, 3, 0, 6.2832); ctx.fill();
+      if (rk.vy >= -50) { rocketsArr.splice(i, 1); spawnBurst(rk.x, rk.y, isMobile() ? 34 : 54, 1.12); }
+    }
+    /* chingaari */
+    for (var j = parts.length - 1; j >= 0; j--) {
+      var p = parts[j];
+      p.life += dt;
+      if (p.life >= p.ttl) { parts.splice(j, 1); continue; }
+      p.vy += 430 * dt;
+      var drag = 1 - 1.35 * dt; if (drag < 0) drag = 0;
+      p.vx *= drag; p.vy *= (1 - 0.4 * dt);
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      var f = 1 - p.life / p.ttl;
+      ctx.globalAlpha = Math.max(0, f * (0.72 + 0.28 * Math.sin(now / 34 + p.sd)));
+      ctx.fillStyle = p.c;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r * (0.5 + 0.5 * f), 0, 6.2832); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    if (parts.length || rocketsArr.length) { raf = requestAnimationFrame(frame); }
+    else { running = false; lastT = 0; ctx.clearRect(0, 0, W, H); if (cv) cv.style.display = "none"; }
+  }
+  function start() {
+    if (!ensure()) return false;
+    cv.style.display = "block";
+    if (!running) { running = true; lastT = 0; raf = requestAnimationFrame(frame); }
+    return true;
+  }
+
+  window.FW = {
+    burst: function (x, y) {
+      if (reduced) return;
+      if (!start()) return;
+      if (typeof x !== "number") { x = lastPt.x; y = lastPt.y; }
+      spawnBurst(x, y, isMobile() ? 26 : 40, 0.95);
+    },
+    rockets: function (n) {
+      if (reduced) return;
+      if (!start()) return;
+      n = n || 3;
+      for (var i = 0; i < n; i++) setTimeout(launchRocket, i * 260);
+    },
+    celebrate: function () {
+      if (reduced) return;
+      if (!start()) return;
+      spawnBurst(lastPt.x, lastPt.y, isMobile() ? 28 : 44, 1);
+      var self = this;
+      setTimeout(function () { self.rockets(2); }, 120);
+    },
+    count: function () { return parts.length + rocketsArr.length; },
+    bursts: function () { return burstsFired; }
+  };
+})();
 
 </script>
 <script>
@@ -1985,11 +2127,12 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
       }
       ctx.restore();
     }
+    drawBigPreview();
   }
   function loop(){ draw(); requestAnimationFrame(loop); }
 
 
-  /* ---------- BIG 3D PREVIEW — BAND hai (user: bada view sirf CLICK par) ----------
+  /* ---------- BIG 3D PREVIEW — cursor le jaate hi kapda bada hokar 3D ghumta hai ----------
      Mouse ko left-right ghumane se angle badalta hai aur Front/Side/Back
      asal photos aati hain (jin products ki hain). Click = pura QuickView. */
   var hoverCloth = null, lastMouse = { x:0, y:0 }, lastPointerType = "mouse";
@@ -2002,7 +2145,6 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
     });
   }
   function drawBigPreview(){
-    return; /* BAND: cursor le jaane par bada preview nahi — click par QuickView khulta hai */
     var target = (!qvP && hoverCloth && lastPointerType !== "touch") ? hoverCloth : null;
     if (target){
       if (pvCloth !== target){ pvCloth = target; pvAng = 0; ensureViewImgs(pvCloth); }
@@ -2081,6 +2223,8 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
     lastMouse = pt;
     if (e.pointerType) lastPointerType = e.pointerType;
     var c = findCloth(pt);
+    /* bada preview khula hai to usi par lock rakho — mouse ghumane se preview na chute */
+    if (!c && pvCloth && pvRect && pt.x >= pvRect.x1 && pt.x <= pvRect.x2 && pt.y >= pvRect.y1 && pt.y <= pvRect.y2) c = pvCloth;
     hoverCloth = c;
     hoverPause = !!c;
     clothes.forEach(function(x){ x.target = (x === c) ? 1 : 0; });
@@ -2090,7 +2234,7 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
       tip.innerHTML = "<b>" + p.name + "</b>" +
         '<span class="pr" style="color:' + c.color + '">₹' + p.price.toLocaleString("en-IN") + "</span>" +
         (p.mrp > p.price ? '<span class="mrp">₹' + p.mrp.toLocaleString("en-IN") + "</span>" : "") +
-        '<div class="cta">👆 Click karo — bada view khulega</div>';
+        '<div class="cta">↔ mouse ghumao — 3D · click = full view</div>';
       tip.style.borderColor = c.color;
       tip.classList.add("show");
       tip.style.left = Math.max(100, Math.min(W-100, pt.x)) + "px";
@@ -2109,11 +2253,12 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
     if (moved > 9 || dt > 600) return;               // drag tha
     var c = findCloth(pt);
     if (c){
+      try{ if (window.FW) FW.burst(pt.x, pt.y); }catch(e){}   /* 🎆 click par fataka */
       Body.setVelocity(c.body, { x:c.body.velocity.x * 0.4, y:-1.2 });
       openQV(c.p);
     } else {
       var bl = balloonAt(pt);   /* balloon par click = wahi product khulega */
-      if (bl && bl.cloth) openQV(bl.cloth.p);
+      if (bl && bl.cloth){ try{ if (window.FW) FW.burst(pt.x, pt.y); }catch(e){} openQV(bl.cloth.p); }
     }
   }
 
@@ -2524,5 +2669,5 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
   else start();
 })();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4f8a699cba208fe',t:'MTc5Mjg0MTQ0MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4f8f3955a7ee83d',t:'MTc5Mjg0NDU5Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
