@@ -725,8 +725,8 @@ footer#site-footer h4{color:var(--vv-gold)}
 <!-- ============ ANNOUNCEMENT BAR: offers ============ -->
 <div class="announcebar" id="announcebar">
   <div class="announce-track" id="announceTrack">
-    <span class="hi">🔥 Festive Sale — Up to 70% OFF</span><span>🚚 ₹999+ Free Shipping</span><span class="hi">📱 UPI se Easy Payment</span><span>🎈 Ghumte balloon par click — product khulega</span><span class="hi">↩️ 7-Day Easy Return</span><span>👆 Kapde par cursor le jao — bada 3D view dikhega</span>
-    <span class="hi">🔥 Festive Sale — Up to 70% OFF</span><span>🚚 ₹999+ Free Shipping</span><span class="hi">📱 UPI se Easy Payment</span><span>🎈 Ghumte balloon par click — product khulega</span><span class="hi">↩️ 7-Day Easy Return</span><span>👆 Kapde par cursor le jao — bada 3D view dikhega</span>
+    <span class="hi">🔥 Festive Sale — Up to 70% OFF</span><span>🚚 ₹999+ Free Shipping</span><span class="hi">📱 UPI se Easy Payment</span><span>🎈 Ghumte balloon par click — product khulega</span><span class="hi">↩️ 7-Day Easy Return</span><span>⭕ Gol ghumte kapde — click karo, bada view khulega</span>
+    <span class="hi">🔥 Festive Sale — Up to 70% OFF</span><span>🚚 ₹999+ Free Shipping</span><span class="hi">📱 UPI se Easy Payment</span><span>🎈 Ghumte balloon par click — product khulega</span><span class="hi">↩️ 7-Day Easy Return</span><span>⭕ Gol ghumte kapde — click karo, bada view khulega</span>
   </div>
 </div>
 
@@ -738,7 +738,7 @@ footer#site-footer h4{color:var(--vv-gold)}
     <div class="poster-badge">🎉 SALE<small>LIVE HAI</small></div>
     <div class="poster-txt">
       <div class="poster-big">UP TO <span class="off">70% OFF</span> ✨ NEW COLLECTION</div>
-      <div class="poster-sub">🚚 ₹999+ par FREE shipping &nbsp;·&nbsp; 📱 UPI payment &nbsp;·&nbsp; ↩️ 7-day easy return &nbsp;·&nbsp; 👆 Kapde par cursor le jao ya 🎈 balloon par click karo</div>
+      <div class="poster-sub">🚚 ₹999+ par FREE shipping &nbsp;·&nbsp; 📱 UPI payment &nbsp;·&nbsp; ↩️ 7-day easy return &nbsp;·&nbsp; ⭕ Circle me kapda ya 🎈 balloon click karo — bada view milega</div>
     </div>
     <a class="poster-cta" href="shop.html">🛍️ SHOP NOW →</a>
   </div>
@@ -1673,14 +1673,19 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
   function frontCutout(p){
     return (p.views && p.views.front) || p.cutout || (window.__CUTOUTS || {})[p.id] || ("assets/img/cutouts/front/" + p.id + ".webp");
   }
+  function sideCutout(p){
+    return (p.views && p.views.side) || ("assets/img/cutouts/side/" + p.id + ".webp");
+  }
+  function hasSidePhoto(p){ return !!(p.views && p.views.side); }
   function loadTex(c, delay){
     setTimeout(function(){
-      var candidates = [frontCutout(c.p), webpOf(c.p.img), c.p.img];
+      /* SIDE POSE sabse pehle — circle me sab kapde side se dikhenge */
+      var candidates = [sideCutout(c.p), frontCutout(c.p), webpOf(c.p.img), c.p.img];
       candidates = candidates.filter(function(x, i){ return x && candidates.indexOf(x) === i; });
       (function tryNext(i){
         if (i >= candidates.length){ bumpLoader(); return; }
         var im = new Image();
-        im.onload = function(){ c.img = im; c.texSrc = candidates[i]; bumpLoader(); };
+        im.onload = function(){ c.img = im; c.texSrc = candidates[i]; c.sideImg = (i === 0); bumpLoader(); };
         im.onerror = function(){ tryNext(i + 1); };
         im.src = candidates[i];
       })(0);
@@ -1688,7 +1693,7 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
   }
   function fitSize(c){
     if (!c.img || !c.img.naturalWidth || !c.img.naturalHeight) return { w:(c.bw || CW), h:CH };
-    var maxW = c.rw || CW * 1.22, maxH = CH * 1.10;
+    var maxW = (c.sideImg ? (c.rw || CW) : (c.rwF || CW * 1.22)), maxH = CH * 1.10;
     var sc = Math.min(maxW / c.img.naturalWidth, maxH / c.img.naturalHeight);
     return { w:c.img.naturalWidth * sc, h:c.img.naturalHeight * sc };
   }
@@ -1697,6 +1702,9 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
   var ASPECT = { CR101:195/253, CR102:300/401, LW201:182/442, LW202:260/468, LW203:461/397,
                  WB301:385/491, WB302:462/379, TS301:490/410, TS302:478/456, MS401:457/504,
                  MS402:456/477, MB501:230/470, MB502:234/489 };
+  /* circle par kapde ki SIDE-POSE chaudaai — asal side photo patli hoti hai,
+     aur jinki side photo nahi hai unko utna hi dabakar side pose milega */
+  function sideRenderWidth(p){ return Math.round(renderWidth(p) * (hasSidePhoto(p) ? 0.52 : SIDE_COS)); }
   function renderWidth(p){
     var a = ASPECT[p.id] || 0.75;
     return Math.min(CW * 1.22, CH * 1.10 * a);
@@ -1733,26 +1741,46 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
 
   /* ---------- sizes — DUKAN STYLE: kam kapde, BADE-BADE ---------- */
   var CW, CH, hanger, ropeY, N, posterH = 128, floorY = 0;
-  /* TRAIN MODE — sab kapde ek line me, hooks rail par slide hote hain */
-  var spacingX = 240, lineLength = 0, trainOffset = 0, trainSpeed = 0.5, trainOn = true, hoverPause = false;   /* GAADI MODE — line chalti rehti hai */
-  var gapX = 12, maxSlot = 240, slotWArr = [], slotBaseArr = [];   /* kapdon ke beech sirf itni jagah */
-  var rackCos = 0.5, rackScale = 1, bodyH = 200;   /* SIDE-ANGLE rack: chaudaai ka dabav + chhoti screen ka scale */
+  /* ⭕ CIRCLE MODE — sab kapde gol ghumte hue boutique stand par, SIDE POSE me.
+     Physics anchor ek invisible seedhi line par sirf x follow karta hai (jhulta waisi
+     ka waisa smooth), dikhne wala hook gol ring par ghoomta hai aur depth ke
+     hisaab se kapda peeche chhota / saamne bada dikhta hai. */
+  var spacingX = 240, lineLength = 36000, trainOffset = 0, trainSpeed = 0.5, trainOn = true, hoverPause = false;
+  var gapX = 12, maxSlot = 240, slotWArr = [], slotBaseArr = [];
+  var rackCos = 1, rackScale = 1, bodyH = 200;
+  var ORB_CX = 0, ORB_CY = 200, ORB_RX = 300, ORB_RY = 16, ORB_N = 13;   /* gol ring ka center + akaar */
+  var ORB_ZMIN = 0.84, ORB_ZMAX = 1.14;   /* depth scale: peeche chhota, saamne bada */
+  var SIDE_COS = 0.36;   /* side photo nahi hai to itna dabav = side pose */
   function computeSizes(){
     posterH = (W <= 600 ? 104 : 128) + (W <= 600 ? 34 : 38);   /* poster + announcement bar */
     floorY  = H - posterH;
-    N = W >= 760 ? 5 : W >= 520 ? 3 : 2;   /* main screen par ek time par itne hi BADE kapde — baaki train me aayenge */
+    N = W >= 760 ? 5 : W >= 520 ? 3 : 2;
     var avail = W - 48;
     CW = Math.max(110, Math.min(330, (avail / N) * 0.95));   /* santulit size — pehle bahut bade lag rahe the */
     CH = Math.round(CW * 1.34);
     hanger = Math.max(26, Math.min(46, Math.round(CW * 0.17)));
-    /* height guard — kapda poster ke andar na ghuse */
-    var usableH = floorY - 84 - hanger - 46;
-    if (CH > usableH && usableH > 120){ CH = Math.round(usableH); CW = Math.round(CH / 1.34); hanger = Math.max(26, Math.min(46, Math.round(CW * 0.17))); }
-    /* rail ko screen ke beech me rakho — upar-niche barabar jagah (poster ke upar tak) */
-    ropeY = Math.max(84, Math.round((floorY - hanger - CH) / 2));
-    gapX = 1;                                                  /* EKDAM BAJU-BAJU: shapes lagbhag chipki hui */
-    spacingX = Math.round(CW + gapX);                          /* fallback/average ke liye */
-    trainSpeed = Math.max(0.3, CW * 0.0025);                  /* ~0.54px/tick desktop = 32px/sec */
+    /* gol ring ki jagah — saamne wala sabse bada kapda bhi poster me na ghuse */
+    var balTop = 84;
+    ORB_RY = (W < 760 ? 12 : 16);
+    var maxCH = (floorY - balTop - 2 * ORB_RY - 14 - ORB_ZMAX * hanger) / (ORB_ZMAX * 1.10);
+    if (CH > maxCH && maxCH > 120){ CH = Math.round(maxCH); CW = Math.round(CH / 1.34); hanger = Math.max(26, Math.min(46, Math.round(CW * 0.17))); }
+    ORB_CX = W / 2;
+    ORB_RX = Math.max(110, Math.min(W / 2 - 26, Math.round(W * 0.40)));
+    var frontBelow = ORB_RY + ORB_ZMAX * (hanger + CH * 1.10);
+    var lo = balTop + ORB_RY + 8, hi = floorY - 6 - frontBelow;
+    ORB_CY = Math.round(hi >= lo ? (lo + hi) / 2 : lo);
+    ropeY = ORB_CY - ORB_RY;   /* ring ka sabse upar wala hissa — bada preview center isi se nikaalte hai */
+    gapX = 1;
+    spacingX = Math.round(CW + gapX);
+    trainSpeed = Math.max(0.3, CW * 0.0025);   /* circle ki raftaar */
+  }
+  /* gol ring par is index ke kapde ki jagah: x/y = dikhne wala hook, z = depth (saamne bada) */
+  function orbitOf(idx){
+    var th = trainOffset * 0.01 + idx * (6.2832 / Math.max(1, ORB_N));
+    var co = Math.cos(th), si = Math.sin(th);
+    var depth01 = (co + 1) / 2;
+    return { th: th, x: ORB_CX + ORB_RX * si, y: ORB_CY + ORB_RY * co,
+             z: ORB_ZMIN + (ORB_ZMAX - ORB_ZMIN) * depth01, d: depth01 };
   }
 
   /* ---------- physics ---------- */
@@ -1854,49 +1882,23 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
     else { engine.positionIterations = 8; engine.velocityIterations = 6; engine.constraintIterations = 4; }
     computeSizes(); makeBokeh();
 
-    /* TRAIN LAYOUT — BADE kapde, screen par ek time par sirf ~N (desktop 5) dikhte hain.
-       Poori line (cycle) screen se kai guna lambi hai; gaadi chalti rehti hai aur
-       baaki kapde baari-baari aate hain. rackCos halka side-angle dabav deta hai. */
+    /* ⭕ CIRCLE LAYOUT — sab kapde gol ring par barabar kono par latke hain;
+       ring ghoomti hai to kapde circle me chalte hain (saamne bade, peeche chhote). */
     var list = pickProducts();
-    var rws = list.map(function(p){ return renderWidth(p); });
-    var fsteps = [];
-    for (var si = 0; si < list.length; si++) fsteps.push(stepBetween(list[si], list[(si + 1) % list.length]));   /* cyclic — aakhri dabbe ke baad pehla, GAADI ki tarah */
-    var frontCycle = fsteps.reduce(function(s,x){ return s + x; }, 0);
-    var VIS = Math.max(1, N || 5);
-    rackCos = Math.max(0.55, Math.min(0.98, ((list.length / VIS) * W) / Math.max(1, frontCycle)));   /* cycle itni lambi ki screen par ~VIS hi aayein */
-    rackScale = 1;
-    var angSteps = fsteps.map(function(s){ return s * rackCos; });
-    var span = angSteps.reduce(function(s,x){ return s + x; }, 0);
-    if (span > 0 && span < W){ var st = W / span; angSteps = angSteps.map(function(s){ return s * st; }); span = W; }   /* line screen se chhoti ho to phaila do — beech me khali gap nahi */
-    var centers = [];
-    var cur = 0;
-    for (var ci = 0; ci < list.length; ci++){ centers.push(cur); cur += angSteps[ci]; }
-    slotWArr = angSteps; slotBaseArr = centers; lineLength = Math.round(span);
+    ORB_N = Math.max(1, list.length);
+    var rwF = list.map(function(p){ return renderWidth(p); });
+    var rws = list.map(function(p){ return sideRenderWidth(p); });
+    rackCos = 1; rackScale = 1;
+    slotWArr = rws.slice();
+    slotBaseArr = list.map(function(p, i){ return Math.round(i * 36000 / ORB_N); });
+    lineLength = 36000;
     maxSlot = rws.length ? Math.round(Math.max.apply(null, rws)) : spacingX;
-    spacingX = angSteps.length ? Math.round(angSteps.reduce(function(s,x){ return s + x; }, 0) / angSteps.length) : spacingX;
-    bodyH = Math.max(56, Math.round(CH * rackScale));
-    ropeY = Math.max(84, Math.round((floorY - hanger - bodyH) / 2));   /* rail rack ke hisaab se beech me */
-    trainOn = true;   /* GAADI chalti rahegi */
-    trainOffset = list.length ? Math.round(rws[0] * rackCos / 2) : 0;
-    /* body widths — angled doori par bhi padosi se takrahat na ho */
-    var bws = list.map(function(p, idx){
-      var near = Math.min(angSteps[(idx + list.length - 1) % list.length], angSteps[idx]);
-      return Math.max(20, Math.min(CW, Math.round(Math.min(rws[idx] * rackCos * rackScale, near - 3))));
-    });
-    for (var k = 0; k + 1 < list.length; k++){
-      var excess = (bws[k] + bws[k + 1]) / 2 - (angSteps[k] - 2);
-      if (excess > 0){
-        var cut = Math.min(bws[k + 1] - 20, Math.ceil(excess * 2));
-        if (cut > 0) bws[k + 1] -= cut;
-        excess = (bws[k] + bws[k + 1]) / 2 - (angSteps[k] - 2);
-        if (excess > 0) bws[k] = Math.max(20, bws[k] - Math.ceil(excess * 2));
-      }
-    }
-
-    if (list.length > 1){
-      var wex = (bws[list.length - 1] + bws[0]) / 2 - (angSteps[list.length - 1] - 2);
-      if (wex > 0) bws[0] = Math.max(20, bws[0] - Math.ceil(wex * 2));
-    }
+    spacingX = rws.length ? Math.round(rws.reduce(function(s,x){ return s + x; }, 0) / rws.length) : spacingX;
+    bodyH = Math.max(56, Math.round(CH));
+    trainOn = true;   /* circle ghumta rahega */
+    trainOffset = 0;
+    /* physics body sirf latakne/jhulne ke liye; chaudaai side-pose ke hisaab se patli */
+    var bws = list.map(function(p, idx){ return Math.max(26, Math.min(CW, rws[idx])); });
 
     /* RAIL — dukan wali seedhi metal rail (static, sag nahi hoga).
        rope[] = rail par ke anchor points; kapde inhi se latakte hain. */
@@ -1915,25 +1917,25 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
       var ax = trainAnchorX(idx);
       var rw = rws[idx];
       var bw = bws[idx];
-      var sC = Bodies.circle(ax, ropeY, 3, { isStatic:true, collisionFilter:{category:CAT_ROPE, mask:0} });
-      var body = Bodies.rectangle(ax, ropeY + hanger + bodyH/2, bw, bodyH, {
+      var sC = Bodies.circle(ax, ORB_CY, 3, { isStatic:true, collisionFilter:{category:CAT_ROPE, mask:0} });
+      var body = Bodies.rectangle(ax, ORB_CY + hanger + bodyH/2, bw, bodyH, {
         chamfer:{ radius: Math.max(6, bw*0.06) },
         frictionAir:0.045, restitution:0.04, density:0.0008, friction:0.25,
-        collisionFilter:{ category:CAT_CLOTH, mask:CAT_CLOTH | CAT_WALL }
+        collisionFilter:{ category:CAT_CLOTH, mask:CAT_WALL }   /* circle me kapde alag depth par hain — aapas ki takrahat band, varna kaanpenge */
       });
       Composite.add(world, [ sC, body,
         Constraint.create({ bodyA:sC, bodyB:body, pointB:{x:0, y:-bodyH/2}, stiffness:1, length:hanger }) ]);
-      var c = { body:body, p:p, img:null, hover:0, target:0, color:catColor(p), sC:sC, idx:idx, phase:idx * 0.85,
-                bw:bw, rw:rw, bh:bodyH, step:(angSteps[idx] || 0), slot:(angSteps[idx] || 0), base:centers[idx] };
+      var c = { body:body, p:p, img:null, sideImg:false, hover:0, target:0, color:catColor(p), sC:sC, idx:idx, phase:idx * 0.85,
+                bw:bw, rw:rw, rwF:rwF[idx], bh:bodyH, step:Math.round(36000 / ORB_N), slot:rw, base:slotBaseArr[idx], _z:1, _rect:null, _orb:null };
       loadTex(c, idx * 80);
       return c;
     });
 
     makeBalloons();
 
-    /* side walls NAHI — train ko ek side se nikal kar dusri side ghusna hai. Floor poori line lamba. */
+    /* side walls NAHI — sirf zameen, taaki kapda poster ke andar na ghuse */
     Composite.add(world, [
-      Bodies.rectangle(lineLength/2, floorY+60, lineLength + W*2, 120, {isStatic:true, collisionFilter:{category:CAT_WALL, mask:CAT_CLOTH}})
+      Bodies.rectangle(W/2, floorY+60, W + 800, 120, {isStatic:true, collisionFilter:{category:CAT_WALL, mask:CAT_CLOTH}})
     ]);
 
     mouse = Mouse.create(canvas);
@@ -1953,15 +1955,16 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
     var bc = document.getElementById("batchChip");
     if (bc){ var tot = loadProducts().length;
       bc.style.display = "inline-flex";
-      bc.textContent = "🚆 " + tot + " kapde line me chal rahe hain"; }
+      bc.textContent = "⭕ " + tot + " kapde circle me ghum rahe hain"; }
 
     window.__CLOTHESLINE = { engine:engine, world:world, rope:rope, clothes:clothes,
       mouseConstraint:mConstraint, sizes:{W:W,H:H,CW:CW,CH:CH,ropeY:ropeY,posterH:posterH,floorY:floorY,N:N,
-        spacingX:spacingX, lineLength:lineLength, trainSpeed:trainSpeed, maxSlot:maxSlot, gapX:gapX, rackCos:rackCos, rackScale:rackScale},
+        spacingX:spacingX, lineLength:lineLength, trainSpeed:trainSpeed, maxSlot:maxSlot, gapX:gapX, rackCos:rackCos, rackScale:rackScale, orbCX:ORB_CX, orbCY:ORB_CY, orbRX:ORB_RX, orbRY:ORB_RY},
       rebuild:build, pick:pickProducts, webpOf:webpOf, frontCutout:frontCutout, buildViews:buildViews, hexToHsl:hexToHsl, shiftPixel:shiftPixel, colourFilter:colourFilter, stepBetween:stepBetween, renderWidth:renderWidth, openQV:openQV,
       setTrain:function(v){ trainOn = !!v; syncTrainBtn(); },
       isTrainOn:function(){ return trainOn; },
       getOffset:function(){ return trainOffset; },
+      getOrbit:function(){ return { cx:ORB_CX, cy:ORB_CY, rx:ORB_RX, ry:ORB_RY, n:ORB_N }; },
       setTrainSpeed:function(v){ trainSpeed = v; },
       getHover:function(){ return hoverCloth; },
       getPreview:function(){ return { cloth:pvCloth, t:pvT, ang:pvAng, rect:pvRect }; },
@@ -1982,92 +1985,93 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
     }
   }
 
-  /* ---------- TRAIN — hooks rail par slide, kapde pendulum ban kar saath chalte hain ---------- */
-  function trainAnchorX(i){
-    if (!lineLength) return slotBaseArr[i] || 0;
-    var x = (slotBaseArr[i] || 0) + trainOffset;
-    x %= lineLength; if (x < 0) x += lineLength;   /* gol chakkar — ek side gaya, dusri side aaya */
-    return x;
-  }
+  /* ---------- ⭕ CIRCLE — hooks gol ring par ghumte hain. Physics anchor sirf x
+     follow karta hai, isliye kapda pendulum ki tarah smooth jhulta bhi hai aur
+     circle bhi aaram se ghoomta hai. Depth (bada/chhota) draw() me lagta hai. ---------- */
+  function trainAnchorX(i){ return Math.round(orbitOf(i).x); }
   function trainTick(ev){
-    if (!trainOn || !lineLength) return;
-    if (qvP) return;                           /* product khula hai — train ruko */
+    if (!trainOn) return;
+    if (qvP) return;                           /* product khula hai — circle ruko */
     if (mConstraint && mConstraint.body) return;  /* customer kapda kheech raha hai — ruko */
     if (hoverPause) return;                    /* mouse kapde par hai — ruko taaki click aasan ho */
     var tdt = (ev && ev.delta) ? ev.delta : 16.667;
-    trainOffset -= trainSpeed * (tdt / 16.667);   /* time-based — har phone/screen par ek jaisi smooth speed */
+    trainOffset -= trainSpeed * (tdt / 16.667);   /* time-based — har screen par ek jaisi smooth raftaar */
     for (var i = 0; i < clothes.length; i++){
       var c = clothes[i];
-      var nx = trainAnchorX(c.idx), ox = c.sC.position.x, dd = nx - ox;
-      if (Math.abs(dd) > lineLength * 0.5)      /* dabba ek side se gayab -> dusri side entry: kapda bhi wahi teleport */
-        Body.setPosition(c.body, { x: c.body.position.x + dd, y: c.body.position.y });
-      Body.setPosition(c.sC, { x: nx, y: ropeY });
+      Body.setPosition(c.sC, { x: trainAnchorX(c.idx), y: ORB_CY });
     }
   }
   function syncTrainBtn(){
     var el = document.getElementById("trainBtn");
-    if (el){ el.classList.toggle("on", trainOn); el.textContent = trainOn ? "🚆 Auto line" : "⏸️ Line ruki"; }
+    if (el){ el.classList.toggle("on", trainOn); el.textContent = trainOn ? "⭕ Circle chal raha hai" : "⏸️ Circle ruka"; }
   }
 
+  function rotPt(cx0, cy0, ox, oy, a){
+    var co = Math.cos(a), si = Math.sin(a);
+    return { x: cx0 + ox * co - oy * si, y: cy0 + ox * si + oy * co };
+  }
   function drawDesignerHanger(c){
-    var fs = fitSize(c);
-    var dw = fs.w * rackCos * rackScale, dh = fs.h * rackScale;
-    var top = worldPt(c.body, {x:0, y:-dh/2});
-    var a = worldPt(c.body, {x:-dw*0.36, y:-dh/2 + dh*0.028});
-    var b = worldPt(c.body, {x: dw*0.36, y:-dh/2 + dh*0.028});
-    var ax = c.sC ? c.sC.position.x : c.body.position.x;
-    var mx = (ax + top.x) / 2, my = (ropeY + top.y) / 2;   /* gardan ka beech */
+    var orb = c._orb || { x:(c.sC ? c.sC.position.x : c.body.position.x), y:ropeY, z:1 };
+    var z = orb.z || 1;
+    var dw = c._dw || c.bw || CW, dh = c._dh || CH;
+    var vcx = (c._vcx != null ? c._vcx : c.body.position.x), vcy = (c._vcy != null ? c._vcy : c.body.position.y);
+    var angA = c.body.angle;
+    var top = rotPt(vcx, vcy, 0, -dh/2, angA);
+    var a = rotPt(vcx, vcy, -dw*0.36, -dh/2 + dh*0.028, angA);
+    var b = rotPt(vcx, vcy,  dw*0.36, -dh/2 + dh*0.028, angA);
+    var ax = orb.x, ay = orb.y;
+    var mx = (ax + top.x) / 2, my = (ay + top.y) / 2;   /* gardan ka beech */
 
     /* trouser bar — kandho ke beech halki golden rekha */
-    ctx.strokeStyle = "rgba(232,196,106,.75)"; ctx.lineWidth = 1.6;
+    ctx.strokeStyle = "rgba(232,196,106,.75)"; ctx.lineWidth = 1.6 * z;
     ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
 
     /* rose-gold kandhe — moti gol salakhain */
     var g = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
     g.addColorStop(0, "#8A4B2A"); g.addColorStop(0.3, "#E8B07D");
     g.addColorStop(0.52, "#F7DDB8"); g.addColorStop(0.74, "#D99A5B"); g.addColorStop(1, "#8A4B2A");
-    ctx.strokeStyle = g; ctx.lineWidth = 6;
+    ctx.strokeStyle = g; ctx.lineWidth = 6 * z;
     ctx.beginPath(); ctx.moveTo(top.x, top.y); ctx.lineTo(a.x, a.y);
     ctx.moveTo(top.x, top.y); ctx.lineTo(b.x, b.y); ctx.stroke();
 
     /* maroon velvet pads — kandho ke aakhri hisse par */
     function pad(p){ return { x: top.x + (p.x - top.x) * 0.58, y: top.y + (p.y - top.y) * 0.58 }; }
     var pa = pad(a), pb = pad(b);
-    ctx.strokeStyle = "#7A1F2B"; ctx.lineWidth = 7.6;
+    ctx.strokeStyle = "#7A1F2B"; ctx.lineWidth = 7.6 * z;
     ctx.beginPath(); ctx.moveTo(pa.x, pa.y); ctx.lineTo(a.x, a.y);
     ctx.moveTo(pb.x, pb.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-    ctx.strokeStyle = "rgba(255,255,255,.20)"; ctx.lineWidth = 2;
+    ctx.strokeStyle = "rgba(255,255,255,.20)"; ctx.lineWidth = 2 * z;
     ctx.beginPath(); ctx.moveTo(pa.x, pa.y - 2); ctx.lineTo(a.x, a.y - 2);
     ctx.moveTo(pb.x, pb.y - 2); ctx.lineTo(b.x, b.y - 2); ctx.stroke();
 
-    /* sunehri gardan */
-    var ng = ctx.createLinearGradient(ax, ropeY, top.x, top.y);
+    /* sunehri gardan — ring ke hook se kapde ke top tak */
+    var ng = ctx.createLinearGradient(ax, ay, top.x, top.y);
     ng.addColorStop(0, "#F3D27A"); ng.addColorStop(1, "#B8860B");
-    ctx.strokeStyle = ng; ctx.lineWidth = 3.4;
-    ctx.beginPath(); ctx.moveTo(ax, ropeY + 1); ctx.lineTo(top.x, top.y); ctx.stroke();
+    ctx.strokeStyle = ng; ctx.lineWidth = 3.4 * z;
+    ctx.beginPath(); ctx.moveTo(ax, ay + 1); ctx.lineTo(top.x, top.y); ctx.stroke();
 
     /* beech me latakta gem — category ke rang ka, golden kinare wala */
     ctx.save();
     ctx.translate(mx, my); ctx.rotate(0.785);
-    ctx.fillStyle = c.color; ctx.strokeStyle = "#F3D27A"; ctx.lineWidth = 1.6;
-    ctx.beginPath(); ctx.rect(-4.2, -4.2, 8.4, 8.4); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = c.color; ctx.strokeStyle = "#F3D27A"; ctx.lineWidth = 1.6 * z;
+    ctx.beginPath(); ctx.rect(-4.2 * z, -4.2 * z, 8.4 * z, 8.4 * z); ctx.fill(); ctx.stroke();
     ctx.fillStyle = "rgba(255,255,255,.75)";
-    ctx.beginPath(); ctx.arc(-1.4, -1.4, 1.2, 0, 6.283); ctx.fill();
+    ctx.beginPath(); ctx.arc(-1.4 * z, -1.4 * z, 1.2 * z, 0, 6.283); ctx.fill();
     ctx.restore();
 
     /* kandho ke siro par sunehri gol tops */
     [a, b].forEach(function(p){
       ctx.fillStyle = "#E9C46A";
-      ctx.beginPath(); ctx.arc(p.x, p.y, 3.8, 0, 6.283); ctx.fill();
+      ctx.beginPath(); ctx.arc(p.x, p.y, 3.8 * z, 0, 6.283); ctx.fill();
       ctx.fillStyle = "rgba(255,255,255,.8)";
-      ctx.beginPath(); ctx.arc(p.x - 1.2, p.y - 1.2, 1.2, 0, 6.283); ctx.fill();
+      ctx.beginPath(); ctx.arc(p.x - 1.2 * z, p.y - 1.2 * z, 1.2 * z, 0, 6.283); ctx.fill();
     });
 
-    /* rail par golden hook-ring + andar ka rang */
-    ctx.strokeStyle = "#E9C46A"; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.arc(ax, ropeY, 6.2, 0, 6.283); ctx.stroke();
-    ctx.strokeStyle = c.color; ctx.lineWidth = 1.8;
-    ctx.beginPath(); ctx.arc(ax, ropeY, 3.4, 0, 6.283); ctx.stroke();
+    /* ring par golden hook-ring + andar ka rang */
+    ctx.strokeStyle = "#E9C46A"; ctx.lineWidth = 3 * z;
+    ctx.beginPath(); ctx.arc(ax, ay, 6.2 * z, 0, 6.283); ctx.stroke();
+    ctx.strokeStyle = c.color; ctx.lineWidth = 1.8 * z;
+    ctx.beginPath(); ctx.arc(ax, ay, 3.4 * z, 0, 6.283); ctx.stroke();
   }
 
   /* ---------- drawing ---------- */
@@ -2114,70 +2118,85 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
 
     drawBalloons();
 
-    /* RAIL — seedhi chamakti metal rod + ceiling supports */
-    if (rope.length > 1){
-      ctx.save();
-      ctx.strokeStyle = "rgba(40,20,50,.35)"; ctx.lineWidth = 3;
-      [W*0.16, W*0.5, W*0.84].forEach(function(x){
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, ropeY); ctx.stroke();
-      });
-      var rg = ctx.createLinearGradient(0, ropeY-5, 0, ropeY+5);
-      rg.addColorStop(0, "#FFF6DC"); rg.addColorStop(0.45, "#E8D9AE");
-      rg.addColorStop(0.55, "#B99B57"); rg.addColorStop(1, "#8A6D2F");
-      ctx.shadowColor = "rgba(0,0,0,.35)"; ctx.shadowBlur = 8; ctx.shadowOffsetY = 3;
-      rr(ctx, 16, ropeY-5, W-32, 10, 5); ctx.fillStyle = rg; ctx.fill();
-      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
-      ctx.fillStyle = "#FFD36E";
-      ctx.beginPath(); ctx.arc(20, ropeY, 8, 0, 6.283); ctx.fill();
-      ctx.beginPath(); ctx.arc(W-20, ropeY, 8, 0, 6.283); ctx.fill();
-      ctx.fillStyle = "#7A5220";
-      ctx.beginPath(); ctx.arc(20, ropeY, 3, 0, 6.283); ctx.fill();
-      ctx.beginPath(); ctx.arc(W-20, ropeY, 3, 0, 6.283); ctx.fill();
-      ctx.restore();
-    }
-
-    /* DESIGNER HANGER — golden hook-ring, rose-gold kandhe, maroon velvet pads,
-       beech me category-color ka gem charm. Boutique wala look. */
+    /* ⭕ GOL RING STAND — boutique wala ghumta stand: zameen par base,
+       do sunehre khambe aur upar golden gol ring jis par hooks ghumte hain */
     ctx.save();
     ctx.lineCap = "round"; ctx.lineJoin = "round";
-    clothes.forEach(function(c){
-      if (c.body.position.x < -maxSlot || c.body.position.x > W + maxSlot) return;   /* bahar wala dabba mat banao */
-      drawDesignerHanger(c);
-    });
+    ctx.save();
+    ctx.translate(ORB_CX, floorY + 10); ctx.scale(1, 0.14);
+    ctx.fillStyle = "rgba(24,8,30,.30)";
+    ctx.beginPath(); ctx.arc(0, 0, ORB_RX * 0.96, 0, 6.283); ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = "rgba(232,196,106,.85)"; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.ellipse(ORB_CX, floorY + 10, ORB_RX * 0.96, Math.max(9, ORB_RX * 0.96 * 0.14), 0, 0, 6.283); ctx.stroke();
+    var poleG = ctx.createLinearGradient(0, ORB_CY, 0, floorY + 10);
+    poleG.addColorStop(0, "#F3D27A"); poleG.addColorStop(0.5, "#C9973F"); poleG.addColorStop(1, "#8A6D2F");
+    ctx.strokeStyle = poleG; ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(ORB_CX - ORB_RX, ORB_CY); ctx.lineTo(ORB_CX - ORB_RX * 0.96, floorY + 10);
+    ctx.moveTo(ORB_CX + ORB_RX, ORB_CY); ctx.lineTo(ORB_CX + ORB_RX * 0.96, floorY + 10);
+    ctx.stroke();
+    var ringG = ctx.createLinearGradient(ORB_CX - ORB_RX, 0, ORB_CX + ORB_RX, 0);
+    ringG.addColorStop(0, "#8A6D2F"); ringG.addColorStop(0.25, "#F3D27A");
+    ringG.addColorStop(0.55, "#FFF3C4"); ringG.addColorStop(0.8, "#E9C46A"); ringG.addColorStop(1, "#8A6D2F");
+    ctx.shadowColor = "rgba(0,0,0,.3)"; ctx.shadowBlur = 7; ctx.shadowOffsetY = 3;
+    ctx.strokeStyle = ringG; ctx.lineWidth = 7;
+    ctx.beginPath(); ctx.ellipse(ORB_CX, ORB_CY, ORB_RX, ORB_RY, 0, 3.1416, 6.2832); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(ORB_CX, ORB_CY, ORB_RX, ORB_RY, 0, 0, 3.1416); ctx.stroke();
+    ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+    ctx.fillStyle = "#FFD36E";
+    ctx.beginPath(); ctx.arc(ORB_CX - ORB_RX, ORB_CY, 7, 0, 6.283); ctx.fill();
+    ctx.beginPath(); ctx.arc(ORB_CX + ORB_RX, ORB_CY, 7, 0, 6.283); ctx.fill();
     ctx.restore();
 
-    /* PRODUCTS ONLY — koi card, box, border ya price-band nahi.
-       Physics body sirf invisible hit/drag proxy hai; dikhega sirf
-       transparent product cutout, apne natural aspect me. */
-    for (var i = 0; i < clothes.length; i++){
-      var c = clothes[i], b = c.body;
-      if (b.position.x < -maxSlot || b.position.x > W + maxSlot) continue;
+    /* KAPDE — peeche wale pehle (chhote + halke rang), saamne wale baad me (bade, saaf).
+       SAB SIDE POSE me: asal side photo hai to wahi, varna front photo ka side dabav.
+       Koi card/box nahi — sirf kapda + designer hanger. Click = bada view. */
+    var order = clothes.slice(0);
+    order.forEach(function(c){ c._orb = orbitOf(c.idx); c._z = c._orb.z; });
+    order.sort(function(a, bb){ return a._z - bb._z; });
+    if (hoverCloth){ var hi = order.indexOf(hoverCloth); if (hi >= 0){ order.splice(hi, 1); order.push(hoverCloth); } }
+    ctx.save();
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+    for (var i = 0; i < order.length; i++){
+      var c = order[i], b = c.body, orb = c._orb;
+      if (b.position.x < -220 || b.position.x > W + 220) continue;
       c.hover += (c.target - c.hover) * 0.10;
       var s = 1 + c.hover * 0.06;
       var f = fitSize(c);
-      var dw = f.w * rackCos * rackScale, dh = f.h * rackScale;   /* SIDE-ANGLE pose */
+      var dw = f.w * orb.z * (c.sideImg ? 1 : SIDE_COS), dh = f.h * orb.z;
+      c._dw = dw; c._dh = dh;
+      /* dikhne wala center — hook ring par baithe, kapda usi ke niche seedha latke */
+      var vcy = b.position.y + (orb.y + hanger * orb.z + dh / 2) - (ORB_CY + hanger + (c.bh || bodyH) / 2);
+      c._vcx = b.position.x; c._vcy = vcy;
+      c._rect = { x1: b.position.x - dw / 2 - 4, x2: b.position.x + dw / 2 + 4, y1: vcy - dh / 2 - 4, y2: vcy + dh / 2 + 4 };
       ctx.save();
-      ctx.translate(b.position.x, b.position.y);
-      ctx.rotate(b.angle); ctx.scale(s,s);
+      ctx.globalAlpha = 0.66 + 0.34 * orb.d;
+      drawDesignerHanger(c);
+      ctx.restore();
+      ctx.save();
+      ctx.translate(b.position.x, vcy);
+      ctx.rotate(b.angle); ctx.scale(s, s);
+      ctx.globalAlpha = 0.66 + 0.34 * orb.d;
       if (c.img && c.img.complete && c.img.naturalWidth){
         ctx.shadowColor = "rgba(30,10,40,.48)";
-        ctx.shadowBlur = W < 760 ? 0 : 14 + c.hover * 18;   /* mobile par mehenga shadow band — smooth chalega */
+        ctx.shadowBlur = W < 760 ? 0 : 12 * orb.z + c.hover * 16;   /* mobile par mehenga shadow band — smooth chalega */
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = 8;
-        ctx.drawImage(c.img, -dw/2, -dh/2, dw, dh);
+        ctx.drawImage(c.img, -dw / 2, -dh / 2, dw, dh);
         ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
       } else {
         /* Loading me bhi box nahi — sirf chhota product symbol */
-        ctx.globalAlpha = .72;
-        ctx.font = Math.round(CW * .34) + "px sans-serif";
+        ctx.font = Math.round(CW * 0.3) + "px sans-serif";
         ctx.textAlign = "center"; ctx.textBaseline = "middle";
         ctx.fillText("👕", 0, 0);
-        ctx.globalAlpha = 1;
       }
       ctx.restore();
     }
+    ctx.restore();
     drawBigPreview();
   }
+
   function loop(){ draw(); requestAnimationFrame(loop); }
 
 
@@ -2186,6 +2205,7 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
      asal photos aati hain (jin products ki hain). Click = pura QuickView. */
   var hoverCloth = null, lastMouse = { x:0, y:0 }, lastPointerType = "mouse";
   var pvCloth = null, pvT = 0, pvAng = 0, pvRect = null;
+  var pvLockFor = null, pvCX = 0, pvCY = 0;   /* preview ka LOCKED center — ek jagah thahra rahega */
   function ensureViewImgs(c){
     if (c._vimgs) return;
     c._vimgs = {};
@@ -2197,10 +2217,10 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
     var target = (!qvP && hoverCloth && lastPointerType !== "touch") ? hoverCloth : null;
     if (target){
       if (pvCloth !== target){ pvCloth = target; pvAng = 0; ensureViewImgs(pvCloth); }
-      pvT = Math.min(1, pvT + 0.09);
+      pvT = Math.min(1, pvT + 0.13);
     } else {
       pvT = Math.max(0, pvT - 0.12);
-      if (pvT === 0){ pvCloth = null; pvRect = null; }
+      if (pvT === 0){ pvCloth = null; pvRect = null; pvLockFor = null; }
     }
     if (!pvCloth || pvT <= 0.01) return;
     var c = pvCloth;
@@ -2208,15 +2228,23 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
     var im0 = (c._vimgs && c._vimgs[views[0].src]) || c.img;
     if (!im0 || !im0.naturalWidth) return;
     var ease = 1 - (1 - pvT) * (1 - pvT);
-    var pvH = Math.min(floorY - ropeY - 26, CH * 2.45) * (0.45 + 0.55 * ease);
-    var pvW = im0.naturalWidth * (pvH / im0.naturalHeight);
-    if (pvW > W * 0.82){ pvH *= (W * 0.82) / pvW; pvW = W * 0.82; }
-    var cx = Math.max(pvW / 2 + 10, Math.min(W - pvW / 2 - 10, c.body.position.x));
-    var cy = ropeY + hanger + (floorY - ropeY - hanger) / 2;
-    pvRect = { x1: cx - pvW / 2 - 26, x2: cx + pvW / 2 + 26, y1: cy - pvH / 2 - 26, y2: cy + pvH / 2 + 52 };
-    /* mouse ki position se 3D angle */
-    var targetAng = Math.max(-180, Math.min(180, (lastMouse.x - cx) * 0.55));
-    pvAng += (targetAng - pvAng) * 0.14;
+    /* PROPER FIXED SIZE — na bahut bada, na padosiyon ko dhakne wala */
+    var pvFH = Math.max(230, Math.min(400, floorY - ropeY - 110));
+    var pvFW = im0.naturalWidth * (pvFH / im0.naturalHeight);
+    if (pvFW > W * 0.36){ pvFH *= (W * 0.36) / pvFW; pvFW = W * 0.36; }
+    var pop = 0.6 + 0.4 * ease;
+    var pvH = pvFH * pop, pvW = pvFW * pop;
+    /* CENTER LOCK — preview EK JAGAH thahra rahe, jhulte kapde ke peeche na bhage */
+    if (pvLockFor !== c){
+      pvLockFor = c;
+      pvCX = Math.max(pvFW / 2 + 14, Math.min(W - pvFW / 2 - 14, c.body.position.x));
+      pvCY = ropeY + hanger + (floorY - ropeY - hanger) / 2;
+    }
+    var cx = pvCX, cy = pvCY;
+    pvRect = { x1: cx - pvFW / 2 - 46, x2: cx + pvFW / 2 + 46, y1: cy - pvFH / 2 - 26, y2: cy + pvFH / 2 + 58 };
+    /* mouse ghumao — product GOL-GOL (round) ghumega */
+    var targetAng = Math.max(-180, Math.min(180, (lastMouse.x - cx) * 0.85));
+    pvAng += (targetAng - pvAng) * 0.22;
     var norm = ((pvAng % 360) + 360) % 360;
     var best = views[0], bestDelta = signedAngleDelta(norm, best.angle);
     views.forEach(function(v){
@@ -2225,16 +2253,16 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
     });
     var im = (c._vimgs && c._vimgs[best.src] && c._vimgs[best.src].naturalWidth) ? c._vimgs[best.src] : im0;
     var w2 = im.naturalWidth * (pvH / im.naturalHeight);
-    if (w2 > W * 0.86) w2 = W * 0.86;
-    var disp = Math.max(-78, Math.min(78, bestDelta * 1.65));
-    var sq = Math.cos(disp * Math.PI / 180); if (sq < 0.16) sq = 0.16; if (best.flip) sq = -sq;
+    if (w2 > W * 0.38) w2 = W * 0.38;
+    var disp = Math.max(-60, Math.min(60, bestDelta * 0.9));   /* halka dabav — kapda sikudega nahi */
+    var sq = Math.cos(disp * Math.PI / 180); if (sq < 0.42) sq = 0.42; if (best.flip) sq = -sq;
 
     ctx.save();
-    ctx.fillStyle = "rgba(24,8,30," + (0.24 * pvT).toFixed(3) + ")";
+    ctx.fillStyle = "rgba(24,8,30," + (0.34 * pvT).toFixed(3) + ")";
     ctx.fillRect(0, 0, W, H);
     /* zameen par naram saaya */
     ctx.save();
-    ctx.translate(cx, cy + pvH / 2 + 12); ctx.scale(1, 0.16);
+    ctx.translate(cx, cy + pvFH / 2 + 12); ctx.scale(1, 0.16);
     ctx.fillStyle = "rgba(20,6,26," + (0.35 * pvT).toFixed(3) + ")";
     ctx.beginPath(); ctx.arc(0, 0, Math.max(20, w2 * Math.abs(sq) * 0.42), 0, 6.283); ctx.fill();
     ctx.restore();
@@ -2250,10 +2278,10 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
     ctx.shadowColor = "rgba(20,6,26,.85)"; ctx.shadowBlur = 8;
     ctx.fillStyle = "#fff";
     ctx.font = "800 " + Math.max(14, Math.round(W * 0.014)) + "px -apple-system,Segoe UI,Roboto,Arial";
-    ctx.fillText(c.p.name, cx, cy + pvH / 2 + 26);
+    ctx.fillText(c.p.name, cx, cy + pvFH / 2 + 26);
     ctx.fillStyle = "#FFD36E";
     ctx.font = "900 " + Math.max(13, Math.round(W * 0.013)) + "px -apple-system,Segoe UI,Roboto,Arial";
-    ctx.fillText("₹" + c.p.price.toLocaleString("en-IN") + "  ·  " + best.label + " " + Math.round(norm) + "°", cx, cy + pvH / 2 + 48);
+    ctx.fillText("₹" + c.p.price.toLocaleString("en-IN") + "  ·  " + best.label + " " + Math.round(norm) + "°", cx, cy + pvFH / 2 + 48);
     ctx.restore();
   }
 
@@ -2264,16 +2292,28 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
     return { x: t.clientX - r.left, y: t.clientY - r.top };
   }
   function findCloth(pt){
-    var hit = Query.point(clothes.map(function(c){ return c.body; }), pt);
+    /* screen par dikhne wali jagah se hit — saamne wala (sabse bada) kapda jeetega */
+    var best = null;
+    for (var i = 0; i < clothes.length; i++){
+      var c = clothes[i], r = c._rect;
+      if (!r) continue;
+      if (pt.x >= r.x1 && pt.x <= r.x2 && pt.y >= r.y1 && pt.y <= r.y2){
+        if (!best || (c._z || 1) > (best._z || 1)) best = c;
+      }
+    }
+    if (best) return best;
+    var hit = Query.point(clothes.map(function(c){ return c.body; }), pt);   /* fallback: physics body */
     return hit.length ? clothes.find(function(c){ return c.body === hit[0]; }) : null;
   }
   function onMove(e){
     var pt = pointerPos(e);
     lastMouse = pt;
     if (e.pointerType) lastPointerType = e.pointerType;
-    var c = findCloth(pt);
-    /* bada preview khula hai to usi par lock rakho — mouse ghumane se preview na chute */
-    if (!c && pvCloth && pvRect && pt.x >= pvRect.x1 && pt.x <= pvRect.x2 && pt.y >= pvRect.y1 && pt.y <= pvRect.y2) c = pvCloth;
+    /* bada preview khula hai to usi par LOCK rakho — mouse ghumate waqt peeche ke
+       kapde hit hokar preview badal na dein (ek jagah, ek hi product) */
+    var c = null;
+    if (pvCloth && pvRect && pt.x >= pvRect.x1 && pt.x <= pvRect.x2 && pt.y >= pvRect.y1 && pt.y <= pvRect.y2) c = pvCloth;
+    else c = findCloth(pt);
     hoverCloth = c;
     hoverPause = !!c;
     clothes.forEach(function(x){ x.target = (x === c) ? 1 : 0; });
@@ -2283,7 +2323,7 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
       tip.innerHTML = "<b>" + p.name + "</b>" +
         '<span class="pr" style="color:' + c.color + '">₹' + p.price.toLocaleString("en-IN") + "</span>" +
         (p.mrp > p.price ? '<span class="mrp">₹' + p.mrp.toLocaleString("en-IN") + "</span>" : "") +
-        '<div class="cta">↔ mouse ghumao — 3D · click = full view</div>';
+        '<div class="cta">👆 Click = bada view · ↔ mouse ghumao — 3D</div>';
       tip.style.borderColor = c.color;
       tip.classList.add("show");
       tip.style.left = Math.max(100, Math.min(W-100, pt.x)) + "px";
@@ -2671,7 +2711,7 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
   function bind(id, fn){ var el = document.getElementById(id); if (el) el.addEventListener("click", fn); }
   bind("windBtn", function(){ windOn = !windOn; this.classList.toggle("on", windOn); showToast(windOn ? "🌬️ Hawa chalu" : "🌬️ Hawa band"); });
   bind("resetBtn", function(){ build(); showToast("↺ Rail set ho gayi"); });
-  bind("trainBtn", function(){ trainOn = !trainOn; syncTrainBtn(); showToast(trainOn ? "🚆 Line chalu — kapde chal rahe hain" : "⏸️ Line ruk gayi"); });
+  bind("trainBtn", function(){ trainOn = !trainOn; syncTrainBtn(); showToast(trainOn ? "⭕ Circle chalu — kapde ghum rahe hain" : "⏸️ Circle ruk gaya"); });
   bind("shakeBtn", function(){
     clothes.forEach(function(c){
       Body.setVelocity(c.body, { x:(Math.random()-0.5)*5, y:-1.5 - Math.random()*2 });
@@ -2718,5 +2758,5 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
   else start();
 })();
 </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a507b810bba53b09',t:'MTc5Mjk5OTQ0Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
