@@ -1742,7 +1742,7 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
     floorY  = H - posterH;
     N = W >= 760 ? 5 : W >= 520 ? 3 : 2;   /* main screen par ek time par itne hi BADE kapde — baaki train me aayenge */
     var avail = W - 48;
-    CW = Math.max(120, Math.min(430, (avail / N) * 1.24));
+    CW = Math.max(110, Math.min(330, (avail / N) * 0.95));   /* santulit size — pehle bahut bade lag rahe the */
     CH = Math.round(CW * 1.34);
     hanger = Math.max(26, Math.min(46, Math.round(CW * 0.17)));
     /* height guard — kapda poster ke andar na ghuse */
@@ -2009,6 +2009,67 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
     if (el){ el.classList.toggle("on", trainOn); el.textContent = trainOn ? "🚆 Auto line" : "⏸️ Line ruki"; }
   }
 
+  function drawDesignerHanger(c){
+    var fs = fitSize(c);
+    var dw = fs.w * rackCos * rackScale, dh = fs.h * rackScale;
+    var top = worldPt(c.body, {x:0, y:-dh/2});
+    var a = worldPt(c.body, {x:-dw*0.36, y:-dh/2 + dh*0.028});
+    var b = worldPt(c.body, {x: dw*0.36, y:-dh/2 + dh*0.028});
+    var ax = c.sC ? c.sC.position.x : c.body.position.x;
+    var mx = (ax + top.x) / 2, my = (ropeY + top.y) / 2;   /* gardan ka beech */
+
+    /* trouser bar — kandho ke beech halki golden rekha */
+    ctx.strokeStyle = "rgba(232,196,106,.75)"; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+
+    /* rose-gold kandhe — moti gol salakhain */
+    var g = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+    g.addColorStop(0, "#8A4B2A"); g.addColorStop(0.3, "#E8B07D");
+    g.addColorStop(0.52, "#F7DDB8"); g.addColorStop(0.74, "#D99A5B"); g.addColorStop(1, "#8A4B2A");
+    ctx.strokeStyle = g; ctx.lineWidth = 6;
+    ctx.beginPath(); ctx.moveTo(top.x, top.y); ctx.lineTo(a.x, a.y);
+    ctx.moveTo(top.x, top.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+
+    /* maroon velvet pads — kandho ke aakhri hisse par */
+    function pad(p){ return { x: top.x + (p.x - top.x) * 0.58, y: top.y + (p.y - top.y) * 0.58 }; }
+    var pa = pad(a), pb = pad(b);
+    ctx.strokeStyle = "#7A1F2B"; ctx.lineWidth = 7.6;
+    ctx.beginPath(); ctx.moveTo(pa.x, pa.y); ctx.lineTo(a.x, a.y);
+    ctx.moveTo(pb.x, pb.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+    ctx.strokeStyle = "rgba(255,255,255,.20)"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(pa.x, pa.y - 2); ctx.lineTo(a.x, a.y - 2);
+    ctx.moveTo(pb.x, pb.y - 2); ctx.lineTo(b.x, b.y - 2); ctx.stroke();
+
+    /* sunehri gardan */
+    var ng = ctx.createLinearGradient(ax, ropeY, top.x, top.y);
+    ng.addColorStop(0, "#F3D27A"); ng.addColorStop(1, "#B8860B");
+    ctx.strokeStyle = ng; ctx.lineWidth = 3.4;
+    ctx.beginPath(); ctx.moveTo(ax, ropeY + 1); ctx.lineTo(top.x, top.y); ctx.stroke();
+
+    /* beech me latakta gem — category ke rang ka, golden kinare wala */
+    ctx.save();
+    ctx.translate(mx, my); ctx.rotate(0.785);
+    ctx.fillStyle = c.color; ctx.strokeStyle = "#F3D27A"; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.rect(-4.2, -4.2, 8.4, 8.4); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "rgba(255,255,255,.75)";
+    ctx.beginPath(); ctx.arc(-1.4, -1.4, 1.2, 0, 6.283); ctx.fill();
+    ctx.restore();
+
+    /* kandho ke siro par sunehri gol tops */
+    [a, b].forEach(function(p){
+      ctx.fillStyle = "#E9C46A";
+      ctx.beginPath(); ctx.arc(p.x, p.y, 3.8, 0, 6.283); ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,.8)";
+      ctx.beginPath(); ctx.arc(p.x - 1.2, p.y - 1.2, 1.2, 0, 6.283); ctx.fill();
+    });
+
+    /* rail par golden hook-ring + andar ka rang */
+    ctx.strokeStyle = "#E9C46A"; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(ax, ropeY, 6.2, 0, 6.283); ctx.stroke();
+    ctx.strokeStyle = c.color; ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.arc(ax, ropeY, 3.4, 0, 6.283); ctx.stroke();
+  }
+
   /* ---------- drawing ---------- */
   function rr(c,x,y,w,h,r){
     if (c.roundRect){ c.beginPath(); c.roundRect(x,y,w,h,r); return; }
@@ -2075,25 +2136,13 @@ document.addEventListener("DOMContentLoaded", ()=> injectChrome());
       ctx.restore();
     }
 
-    /* hanger — rail par ek hook, niche triangle (asli hanger) */
+    /* DESIGNER HANGER — golden hook-ring, rose-gold kandhe, maroon velvet pads,
+       beech me category-color ka gem charm. Boutique wala look. */
     ctx.save();
-    ctx.strokeStyle = "rgba(255,250,235,.85)"; ctx.lineWidth = 2; ctx.lineCap = "round";
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
     clothes.forEach(function(c){
       if (c.body.position.x < -maxSlot || c.body.position.x > W + maxSlot) return;   /* bahar wala dabba mat banao */
-      var fs = fitSize(c);
-      var dw = fs.w * rackCos * rackScale, dh = fs.h * rackScale;
-      var top = worldPt(c.body, {x:0, y:-dh/2});
-      var a = worldPt(c.body, {x:-dw*0.34, y:-dh/2});
-      var b = worldPt(c.body, {x: dw*0.34, y:-dh/2});
-      var ax = c.sC ? c.sC.position.x : c.body.position.x;
-      ctx.beginPath();
-      ctx.moveTo(ax, ropeY + 1); ctx.lineTo(top.x, top.y);      /* hook ki gardan */
-      ctx.moveTo(top.x, top.y); ctx.lineTo(a.x, a.y);           /* triangle baayein */
-      ctx.moveTo(top.x, top.y); ctx.lineTo(b.x, b.y);           /* triangle daayein */
-      ctx.stroke();
-      ctx.strokeStyle = c.color; ctx.lineWidth = 2.6;
-      ctx.beginPath(); ctx.arc(ax, ropeY, 5.5, 0, 6.283); ctx.stroke();   /* hook ring */
-      ctx.strokeStyle = "rgba(255,250,235,.85)"; ctx.lineWidth = 2;
+      drawDesignerHanger(c);
     });
     ctx.restore();
 
